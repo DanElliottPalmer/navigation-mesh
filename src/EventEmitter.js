@@ -4,6 +4,10 @@ class EventEmitter {
 		this._listeners = {};
 	}
 
+	destroy(){
+		this._listeners = null;
+	}
+
 	has( type ){
 		return this._listeners.hasOwnProperty( type ) &&
 			this._listeners[ type ].length > 0;
