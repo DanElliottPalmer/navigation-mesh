@@ -6,19 +6,20 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
 	<body>
+		<canvas id="domCanvas" width="800" height="800"></canvas>
 		<script src="dist/NavigationMesh.js"></script>
 		<script>
-			var eve = new EventEmitter();
-			eve.on("test", function(){
-				console.log("test1", arguments);
+			var canvas = new Renderer( document.getElementById("domCanvas") );
+			canvas.on("render", function onRender(){
+				this.clear();
+				var ctx = this.ctx;
+				ctx.fillStyle = "#f00";
+				ctx.fillRect( 10, 10, 100, 100 );
 			});
-			eve.on("test", test2);
-			function test2(){
-				console.log("test2", arguments);
-				eve.off("test", test2);
-				eve.trigger("test", 1, 2);
-			}
-			eve.trigger("test", 1, 2, 3);
+
+			setTimeout(function(){
+				canvas.destroy();
+			},1000);
 		</script>
 	</body>
 </html>
