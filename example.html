@@ -9,17 +9,19 @@
 		<canvas id="domCanvas" width="800" height="800"></canvas>
 		<script src="dist/NavigationMesh.js"></script>
 		<script>
-			var canvas = new Renderer( document.getElementById("domCanvas") );
-			canvas.on("render", function onRender(){
+
+			function onRender(){
 				this.clear();
 				var ctx = this.ctx;
 				ctx.fillStyle = "#f00";
 				ctx.fillRect( 10, 10, 100, 100 );
-			});
+			}
 
-			setTimeout(function(){
-				canvas.destroy();
-			},1000);
+			var pt1 = new Point( 2, 3 );
+
+			var canvas = new Renderer( document.getElementById("domCanvas") );
+			canvas.on( "render", onRender );
+
 		</script>
 	</body>
 </html>
