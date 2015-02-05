@@ -7,39 +7,57 @@
 	</head>
 	<body>
 		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas>
+		<button id="btnTriangulize">Triangulize</button>
 		<script type="text/javascript" src="node_modules/poly2tri/dist/poly2tri.js"></script>
 		<script src="dist/NavigationMesh.js"></script>
 		<script>
+
+			function triangulize( polygon ){
+				var contour = [];
+				polygon.points.forEach(function( point ){
+					contour.push( new poly2tri.Point( point.x, point.y ) );
+				});
+				var context = new poly2tri.SweepContext( contour );
+				context.triangulate();
+				return context.getTriangles();
+			}
 
 			function onRender(){
 				this.clear();
 				this.render();
 			}
 
+			function randomHex(){
+				return '#'+Math.floor(Math.random()*16777215).toString(16);
+			}
+
 			var polygon = new Polygon([]);
-			var rect = new Rectangle( 10, 10, 100, 100 );
-			rect.on("click", function(){
-				console.log("A");
-			});
-			var rect2 = new Rectangle( 50, 50, 100, 100 );
-			rect2.fill = "#f00";
-			rect2.on("click", function(e){
-				console.log("b");
-				e.returnValue = false;
-			});
+			polygon.fill = "#f5f5f5";
 			var stage = new Stage();
-			// stage.addChild( polygon );
-			stage.addChild( rect );
-			stage.addChild( rect2 );
+			stage.addChild( polygon );
 			var canvas = new Renderer( document.getElementById("domCanvas") );
 			canvas.on( "render", onRender );
 			canvas.stage = stage;
 
 			var point;
-			// canvas.on("click", function( e ){
-			// 	console.log( e );
+			canvas.on("click", function( e ){
+				point = new Point( e.offsetX, e.offsetY );
+				polygon.points.push( point );
+			});
 
-			// });
+			document.getElementById("btnTriangulize").addEventListener("click", function(){
+				var triangles = triangulize( polygon );
+				triangles.forEach(function( triangle ){
+					var points = [];
+					var poly;
+					triangle.getPoints().forEach(function(point){
+						points.push( new Point( point.x, point.y ) );
+					});
+					poly = new Polygon( points );
+					poly.fill = randomHex();
+					stage.addChild( poly );
+				});
+			});
 
 		</script>
 	</body>
