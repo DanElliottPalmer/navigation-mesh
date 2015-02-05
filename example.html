@@ -6,7 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
 	<body>
-		<canvas id="domCanvas" width="800" height="800"></canvas>
+		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas>
+		<script type="text/javascript" src="node_modules/poly2tri/dist/poly2tri.js"></script>
 		<script src="dist/NavigationMesh.js"></script>
 		<script>
 
@@ -15,24 +16,30 @@
 				this.render();
 			}
 
-			var p1 = new Point( 0, 0 );
-			var p2 = new Point( 200, 150 );
-			var p3 = new Point( 120, 200 );
-			var polygon = new Polygon( [ p1, p2, p3 ] );
-			polygon.on("click", function( e ){
-				console.log( e );
+			var polygon = new Polygon([]);
+			var rect = new Rectangle( 10, 10, 100, 100 );
+			rect.on("click", function(){
+				console.log("A");
 			});
-
-			var rect = new Rectangle( 30, 0, 100, 200 );
-			rect.fill = "#f00";
-
+			var rect2 = new Rectangle( 50, 50, 100, 100 );
+			rect2.fill = "#f00";
+			rect2.on("click", function(e){
+				console.log("b");
+				e.returnValue = false;
+			});
 			var stage = new Stage();
-			stage.addChild( polygon );
+			// stage.addChild( polygon );
 			stage.addChild( rect );
-
+			stage.addChild( rect2 );
 			var canvas = new Renderer( document.getElementById("domCanvas") );
 			canvas.on( "render", onRender );
 			canvas.stage = stage;
+
+			var point;
+			// canvas.on("click", function( e ){
+			// 	console.log( e );
+
+			// });
 
 		</script>
 	</body>

@@ -9,6 +9,13 @@ class Rectangle extends DisplayObject {
 		this.y = y >>> 0;
 	}
 
+	containsPoint( point ){
+		return ( point.y >= this.y &&
+				 point.y <= this.height + this.y &&
+				 point.x >= this.x &&
+				 point.x <= this.width + this.x );
+	}
+
 	render( ctx ){
 		ctx.save();
 		ctx.fillStyle = this.fill;
