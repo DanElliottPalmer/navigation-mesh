@@ -42,6 +42,7 @@ class Polygon extends DisplayObject {
 	}
 
 	render( ctx ){
+		if( this.points.length === 0 ) return;
 		ctx.fillStyle = this.fill;
 		ctx.beginPath();
 		ctx.moveTo( this.points[0].x, this.points[0].y );
