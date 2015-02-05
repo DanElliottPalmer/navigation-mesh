@@ -19,9 +19,16 @@
 			var p2 = new Point( 200, 150 );
 			var p3 = new Point( 120, 200 );
 			var polygon = new Polygon( [ p1, p2, p3 ] );
+			polygon.on("click", function( e ){
+				console.log( e );
+			});
+
+			var rect = new Rectangle( 30, 0, 100, 200 );
+			rect.fill = "#f00";
 
 			var stage = new Stage();
 			stage.addChild( polygon );
+			stage.addChild( rect );
 
 			var canvas = new Renderer( document.getElementById("domCanvas") );
 			canvas.on( "render", onRender );
