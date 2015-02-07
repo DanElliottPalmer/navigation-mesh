@@ -6,8 +6,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
 	<body>
-		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas>
+		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas> <br />
 		<button id="btnTriangulize">Triangulize</button>
+		<textarea id="txtOutput" rows="15" cols="100"></textarea>
 		<script type="text/javascript" src="node_modules/poly2tri/dist/poly2tri.js"></script>
 		<script src="dist/NavigationMesh.js"></script>
 		<script>
@@ -46,6 +47,7 @@
 			});
 
 			document.getElementById("btnTriangulize").addEventListener("click", function(){
+				if( polygon.points.length < 3 ) return;
 				var triangles = triangulize( polygon );
 				triangles.forEach(function( triangle ){
 					var points = [];
@@ -57,7 +59,36 @@
 					poly.fill = randomHex();
 					stage.addChild( poly );
 				});
+				document.getElementById("txtOutput").value = generateOutput( triangles );
 			});
+
+			function generateOutput( triangles ){
+				var output = {
+					"points": [],
+					"triangles": []
+				};
+				var pointLookup = {};
+				var pointIndex = -1;
+				var pointString = null;
+				var triangleIndices = null;
+				triangles.forEach(function( triangle ){
+					triangleIndices = [];
+					triangle.getPoints().forEach(function( point ){
+						pointIndex = -1;
+						pointString = point.toString();
+						if( !pointLookup.hasOwnProperty( pointString ) ){
+							pointIndex = output.points.length;
+							output.points.push( [ point.x, point.y ] );
+							pointLookup[ pointString ] = pointIndex;
+						} else {
+							pointIndex = pointLookup[ pointString ];
+						}
+						triangleIndices.push( pointIndex );
+					});
+					output.triangles.push( triangleIndices );
+				});
+				return JSON.stringify( output );
+			}
 
 		</script>
 	</body>
