@@ -48,6 +48,46 @@ class Polygon extends DisplayObject {
 		return centroid;
 	}
 
+	containsPoint( point ){
+
+		if( this.points.length < 3 ){
+			return false;
+		}
+
+		if( !this.bounds.containsPoint( point ) ){
+			return false;
+		}
+
+		// Ray cast
+		var intersections = 0,
+			len = this.points.length,
+			x1 = this.bounds.x, x2 = x1 + this.bounds.width,
+			epsilon = Math.floor( ( x2-x1 )/100 ),
+			point1 = new Point(0,0),
+			point2 = new Point(0,0),
+			point3 = new Point( x1-epsilon, point.y ),
+			point4 = point.clone();
+
+		var i = -1;
+
+		while( ++i < len ){
+
+			point1.x = this.points[i].x;
+			point1.y = this.points[i].y;
+
+			point2.x = this.points[ (i+1) % len ].x;
+			point2.y = this.points[ (i+1) % len ].y;
+
+			if( polygonIntersection( point3, point4, point1, point2 ) ){
+				intersections++;
+			}
+
+		}
+
+		return (intersections%2 === 0);
+
+	}
+
 	constructor( points ){
 		super();
 		this._cachedBounds = null;
