@@ -116,7 +116,6 @@ function getBoundFromPoints( points ){
 		if( maxY < point.y ){
 			maxY = point.y;
 		}
-		console.log( point );
 	}
 	return new Rectangle( minX, minY, maxX - minX, maxY - minY );
 }
