@@ -1,5 +1,17 @@
 class Polygon extends DisplayObject {
 
+	addPoint( point ){
+		this.points.push( point );
+		this._cachedBounds = null;
+	}
+
+	get bounds(){
+		if( this._cachedBounds !== null ){
+			return this._cachedBounds;
+		}
+		return ( this._cachedBounds = getBoundFromPoints( this.points ) );
+	}
+
 	centroid(){
 		var centroid = new Point();
 		var pts = this.points;
@@ -38,7 +50,18 @@ class Polygon extends DisplayObject {
 
 	constructor( points ){
 		super();
-		this.points = points.slice( 0 );
+		this._cachedBounds = null;
+		this._points = points.slice( 0 );
+
+		this._cachedBounds = getBoundFromPoints( this.points );
+	}
+
+	get points(){
+		return this._points;
+	}
+	set points( points ){
+		this._points = points;
+		this._cachedBounds = null;
 	}
 
 	render( ctx ){
@@ -54,4 +77,46 @@ class Polygon extends DisplayObject {
 		ctx.fill();
 	}
 
+}
+
+function polygonIntersection( VecA, VecB, VecC, VecD ){
+	/**
+	 * VecA - Epsilon
+	 * VecB - Click point
+	 * VecC - Point1 Segment
+	 * VecD - Point2 Segment
+	 */
+
+	function ccw(x, y, z) {
+		return (z.y-x.y) * (y.x-x.x) >= (y.y-x.y) * (z.x-x.x);
+	}
+
+	return ccw(VecA, VecC, VecD) !== ccw(VecB, VecC, VecD) &&
+			ccw(VecA, VecB, VecC) !== ccw(VecA, VecB, VecD);
+};
+
+function getBoundFromPoints( points ){
+	var len = points.length;
+	var point;
+	var minX = Number.MAX_VALUE;
+	var minY = Number.MAX_VALUE;
+	var maxX = Number.MIN_VALUE;
+	var maxY = Number.MIN_VALUE;
+	while( len-- ){
+		point = points[ len ];
+		if( minX > point.x ){
+			minX = point.x;
+		}
+		if( maxX < point.x ){
+			maxX = point.x;
+		}
+		if( minY > point.y ){
+			minY = point.y;
+		}
+		if( maxY < point.y ){
+			maxY = point.y;
+		}
+		console.log( point );
+	}
+	return new Rectangle( minX, minY, maxX - minX, maxY - minY );
 }

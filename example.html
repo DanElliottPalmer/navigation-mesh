@@ -42,7 +42,7 @@
 			var point;
 			canvas.on("click", function( e ){
 				point = new Point( e.offsetX, e.offsetY );
-				polygon.points.push( point );
+				polygon.addPoint( point );
 			});
 
 			document.getElementById("btnTriangulize").addEventListener("click", function(){
