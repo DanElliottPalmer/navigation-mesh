@@ -69,7 +69,7 @@ class Polygon extends DisplayObject {
 		var intersections = 0,
 			len = this.points.length,
 			x1 = this.bounds.x, x2 = x1 + this.bounds.width,
-			epsilon = Math.floor( ( x2-x1 )/100 ),
+			epsilon = ( x2-x1 )/100,
 			point1 = new Point(0,0),
 			point2 = new Point(0,0),
 			point3 = new Point( x1-epsilon, point.y ),
@@ -90,8 +90,7 @@ class Polygon extends DisplayObject {
 			}
 
 		}
-
-		return (intersections%2 === 0);
+		return (intersections%2 !== 0);
 
 	}
 
