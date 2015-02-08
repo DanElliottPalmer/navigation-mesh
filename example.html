@@ -61,7 +61,7 @@
 					poly.strokeWidth = 1;
 					stage.addChild( poly );
 					var centroid = poly.centroid;
-					var circle = new Circle( centroid.x, centroid.y, 5 );
+					var circle = new Circle( centroid.x, centroid.y, 2 );
 					circle.fill = "#f00";
 					stage.addChild( circle );
 				});
@@ -69,7 +69,9 @@
 			});
 
 			function generateOutput( triangles ){
+				console.log( triangles );
 				var output = {
+					"neighbours": [],
 					"points": [],
 					"triangles": []
 				};
@@ -77,6 +79,13 @@
 				var pointIndex = -1;
 				var pointString = null;
 				var triangleIndices = null;
+				var triangleNeighbours = [];
+				// Add ids to triangles
+				triangles = triangles.map(function( triangle, index ){
+					triangle._ID = index;
+					return triangle;
+				});
+				// Work out shared points
 				triangles.forEach(function( triangle ){
 					triangleIndices = [];
 					triangle.getPoints().forEach(function( point ){
@@ -91,6 +100,12 @@
 						}
 						triangleIndices.push( pointIndex );
 					});
+					triangleNeighbours = [];
+					triangle.neighbors_.forEach(function( neighbor ){
+						if( neighbor === null || !neighbor.isInterior() ) return;
+						triangleNeighbours.push( neighbor._ID );
+					});
+					output.neighbours.push( triangleNeighbours );
 					output.triangles.push( triangleIndices );
 				});
 				return JSON.stringify( output );
