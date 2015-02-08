@@ -8,10 +8,15 @@
 	<body>
 		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas> <br />
 		<button id="btnTriangulize">Triangulize</button>
+		<button id="btnHoles">Draw holes</button>
 		<textarea id="txtOutput" rows="15" cols="100"></textarea>
 		<script type="text/javascript" src="node_modules/poly2tri/dist/poly2tri.js"></script>
 		<script src="dist/NavigationMesh.js"></script>
 		<script>
+
+			var holeMode = false;
+			var hole = null;
+			var holes = [];
 
 			function triangulize( polygon ){
 				var contour = [];
@@ -19,6 +24,14 @@
 					contour.push( new poly2tri.Point( point.x, point.y ) );
 				});
 				var context = new poly2tri.SweepContext( contour );
+				// add holes
+				holes.forEach(function(hole){
+					contour = [];
+					hole.points.forEach(function(point){
+						contour.push( new poly2tri.Point( point.x, point.y ) );
+					});
+					context.addHole( contour );
+				});
 				context.triangulate();
 				return context.getTriangles();
 			}
@@ -43,7 +56,16 @@
 			var point;
 			canvas.on("click", function( e ){
 				point = new Point( e.offsetX, e.offsetY );
-				polygon.addPoint( point );
+				if( holeMode ){
+					if( hole === null ){
+						hole = new Polygon([]);
+						hole.fill = "#fff";
+						stage.addChild( hole );
+					}
+					hole.addPoint( point );
+				} else {
+					polygon.addPoint( point );
+				}
 			});
 
 			document.getElementById("btnTriangulize").addEventListener("click", function(){
@@ -110,6 +132,19 @@
 				});
 				return JSON.stringify( output );
 			}
+
+			document.getElementById("btnHoles").addEventListener("click", function(){
+
+				if( !holeMode ){
+					 holeMode = true;
+				}
+
+				if( hole !== null ){
+					holes.push( hole );
+					hole = null;
+				}
+
+			});
 
 		</script>
 	</body>
