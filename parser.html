@@ -17,6 +17,15 @@
 		<script type="text/javascript">
 
 			var renderer = new Renderer( document.getElementById("domCanvas") );
+			renderer.on("click", function( e ){
+				var node = mesh.graph.containsPoint( e.offsetX, e.offsetY );
+				mesh.triangles.forEach(function(triangle){
+					triangle.stroke = "#f00";
+				});
+				if( !node ) return;
+				node.triangle.stroke = "#00f";
+				renderGraph();
+			});
 
 			var stage = new Stage();
 			renderer.stage = stage;

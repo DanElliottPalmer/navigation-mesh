@@ -32,11 +32,9 @@ class NavigationMesh extends EventEmitter {
 		} );
 
 		// Parse graph network
-		var centroid;
 		var node;
 		var nodes = this._triangles.map( (triangle, index) => {
-			centroid = triangle.centroid;
-			node = new NavigationNode( centroid.x, centroid.y );
+			node = new NavigationNode( triangle );
 			node.neighbours = dataStructure.neighbours[ index ];
 			return node;
 		} );
