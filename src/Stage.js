@@ -1,6 +1,10 @@
 class Stage extends EventEmitter {
 
 	addChild( child ){
+		if( Array.isArray( child ) ){
+			child.forEach( this.addChild.bind( this ) );
+			return;
+		}
 		this.children.push( child );
 	}
 
