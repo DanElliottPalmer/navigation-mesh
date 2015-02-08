@@ -15,7 +15,6 @@ class Polygon extends DisplayObject {
 		var nextPoint = this.points[ length - 1 ];
 		while( ++i < length ){
 			currentPoint = this.points[ i ];
-			console.log( currentPoint.toString(), nextPoint.toString() );
 			area += ( currentPoint.x * nextPoint.y );
 			area -= ( currentPoint.y * nextPoint.x );
 			nextPoint = this.points[ i ];
