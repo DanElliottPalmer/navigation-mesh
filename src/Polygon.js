@@ -5,6 +5,27 @@ class Polygon extends DisplayObject {
 		this._cachedBounds = null;
 	}
 
+	get area(){
+
+		var area = 0;
+		var i = -1;
+		var length = this.points.length;
+
+		var currentPoint;
+		var nextPoint = this.points[ length - 1 ];
+		while( ++i < length ){
+			currentPoint = this.points[ i ];
+			console.log( currentPoint.toString(), nextPoint.toString() );
+			area += ( currentPoint.x * nextPoint.y );
+			area -= ( currentPoint.y * nextPoint.x );
+			nextPoint = this.points[ i ];
+		}
+		area /= 2;
+
+		return area;
+
+	}
+
 	get bounds(){
 		if( this._cachedBounds !== null ){
 			return this._cachedBounds;
@@ -12,39 +33,26 @@ class Polygon extends DisplayObject {
 		return ( this._cachedBounds = getBoundFromPoints( this.points ) );
 	}
 
-	centroid(){
-		var centroid = new Point();
-		var pts = this.points;
-		var signedArea = 0;
-		var area = 0;
-		var x0 = 0;
-		var y0 = 0;
-		var x1 = 0;
-		var y1 = 0;
+	get centroid(){
 
-		var calculate = function( pt1, pt2 ){
-			x0 = pt1.x;
-			y0 = pt1.y;
-			x1 = pt2.x;
-			y1 = pt2.y;
+		var centroid = new Point( 0, 0 );
+		var i = -1;
+		var length = this.points.length;
+		var value;
 
-			area = x0*y1 - x1*y0;
-			signedArea += area;
-			centroid.x += ( x0 + x1 ) * area;
-			centroid.y += ( y0 + y1 ) * area;
-		};
-
-		var i = -1, l = pts.length-1;
-		while( ++i < l ){
-			calculate( pts[i], pts[i+1] );
+		var currentPoint;
+		var nextPoint = this.points[ length - 1 ];
+		while( ++i < length ){
+			currentPoint = this.points[ i ];
+			value = currentPoint.x * nextPoint.y - nextPoint.x * currentPoint.y;
+			centroid.x += ( currentPoint.x + nextPoint.x ) * value;
+			centroid.y += ( currentPoint.y + nextPoint.y ) * value;
+			nextPoint = this.points[ i ];
 		}
 
-		calculate( pts[i], pts[0] );
-
-		signedArea = ( signedArea * 0.5 ) * 6;
-		centroid.x /= signedArea;
-		centroid.y /= signedArea;
-
+		value = this.area * 6;
+		centroid.x = centroid.x / value;
+		centroid.y = centroid.y / value;
 		return centroid;
 	}
 
