@@ -12,15 +12,11 @@
 		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas> <br />
 		<textarea cols="50" rows="10" id="txtInput">{"neighbours":[[1],[3,2,0],[1],[4,1],[3,5],[6,4],[5]],"points":[[125,313],[122,69],[191,223],[274,146],[269,331],[575,58],[443,149],[580,328],[449,333]],"triangles":[[0,1,2],[2,1,3],[4,2,3],[3,1,5],[6,3,5],[6,5,7],[8,6,7]]}</textarea>
 		<button id="btnParse">Parse</button>
+		<button id="btnGraph">Render graph</button>
 		<script src="dist/NavigationMesh.js"></script>
 		<script type="text/javascript">
 
 			var renderer = new Renderer( document.getElementById("domCanvas") );
-			renderer.on("render", onRender);
-			function onRender(){
-				this.clear();
-				this.render();
-			}
 
 			var stage = new Stage();
 			renderer.stage = stage;
@@ -31,6 +27,7 @@
 				mesh = new NavigationMesh();
 				mesh.parse( JSON.parse( document.getElementById("txtInput").value ) );
 				stage.addChild( mesh.triangles );
+				renderer.render();
 			});
 
 
@@ -38,7 +35,34 @@
 			 * DEBUG RENDER BITS
 			 */
 
+			function renderGraph(){
+				renderer.clear();
+				renderer.render();
 
+				var graph = mesh.graph;
+				var neighbour;
+				var circle = new Circle(0,0,4);
+				circle.fill = "#0f0";
+				var link = new Line( 0, 0, 0, 0 );
+				link.stroke = "#00f";
+				graph.nodes.forEach(function( node ){
+					// Node
+					circle.cx = node.x;
+					circle.cy = node.y;
+					circle.render( renderer.ctx );	
+					// Links
+					node.neighbours.forEach(function( index ){
+						neighbour = graph.nodes[ index ];
+						link.x1 = node.x;
+						link.y1 = node.y;
+						link.x2 = neighbour.x;
+						link.y2 = neighbour.y;
+						link.render( renderer.ctx );
+					});
+				});
+
+			}
+			document.getElementById("btnGraph").addEventListener("click", renderGraph);
 
 
 
