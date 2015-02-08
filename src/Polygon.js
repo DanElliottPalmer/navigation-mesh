@@ -112,7 +112,7 @@ class Polygon extends DisplayObject {
 	}
 
 	render( ctx ){
-		if( this.points.length < 2 ) return;
+		if( !this.visible || this.points.length < 2 ) return;
 		ctx.save();
 		ctx.beginPath();
 		ctx.moveTo( this.points[0].x, this.points[0].y );

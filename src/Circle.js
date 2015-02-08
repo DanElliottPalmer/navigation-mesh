@@ -42,6 +42,7 @@ class Circle extends DisplayObject {
 	}
 
 	render( ctx ){
+		if( !this.visible ) return;
 		ctx.save();
 		ctx.beginPath();
 		ctx.arc( this.cx, this.cy, this.radius, 0, Math.PI*2, false );

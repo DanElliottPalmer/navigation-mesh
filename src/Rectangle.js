@@ -17,6 +17,7 @@ class Rectangle extends DisplayObject {
 	}
 
 	render( ctx ){
+		if( !this.visible ) return;
 		ctx.save();
 		ctx.beginPath();
 		ctx.rect( this.x, this.y, this.width, this.height );
