@@ -34,7 +34,7 @@ class Circle extends DisplayObject {
 	}
 
 	get cy(){
-		return this._cx;
+		return this._cy;
 	}
 	set cy( cy ){
 		this._cy = cy >>> 0;
