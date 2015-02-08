@@ -56,7 +56,9 @@
 						points.push( new Point( point.x, point.y ) );
 					});
 					poly = new Polygon( points );
-					poly.fill = randomHex();
+					poly.fill = "none";
+					poly.stroke = "#f00";
+					poly.strokeWidth = 1;
 					stage.addChild( poly );
 				});
 				document.getElementById("txtOutput").value = generateOutput( triangles );

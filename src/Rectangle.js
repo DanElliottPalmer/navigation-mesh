@@ -18,8 +18,18 @@ class Rectangle extends DisplayObject {
 
 	render( ctx ){
 		ctx.save();
-		ctx.fillStyle = this.fill;
-		ctx.fillRect( this.x, this.y, this.width, this.height );
+		ctx.beginPath();
+		ctx.rect( this.x, this.y, this.width, this.height );
+		ctx.closePath();
+		if( this.fill !== "none" ){
+			ctx.fillStyle = this.fill;
+			ctx.fill();
+		}
+		if( this.strokeWidth > 0 ){
+			ctx.lineWidth = this.strokeWidth;
+			ctx.strokeStyle = this.stroke;
+			ctx.stroke();
+		}
 		ctx.restore();
 	}
 

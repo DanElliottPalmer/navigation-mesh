@@ -106,7 +106,7 @@ class Polygon extends DisplayObject {
 
 	render( ctx ){
 		if( this.points.length < 2 ) return;
-		ctx.fillStyle = this.fill;
+		ctx.save();
 		ctx.beginPath();
 		ctx.moveTo( this.points[0].x, this.points[0].y );
 		this.points.forEach(function onEachPoint( point, index ){
@@ -114,7 +114,16 @@ class Polygon extends DisplayObject {
 			ctx.lineTo( point.x, point.y );
 		});
 		ctx.closePath();
-		ctx.fill();
+		if( this.fill !== "none" ){
+			ctx.fillStyle = this.fill;
+			ctx.fill();
+		}
+		if( this.strokeWidth > 0 ){
+			ctx.lineWidth = this.strokeWidth;
+			ctx.strokeStyle = this.stroke;
+			ctx.stroke();
+		}
+		ctx.restore();
 	}
 
 }
