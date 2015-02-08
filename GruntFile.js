@@ -14,7 +14,7 @@ module.exports = function( grunt ) {
 		"concat": {
 			"dist": {
 				"dest": "dist/NavigationMesh-es6.js",
-				"src": [ "src/EventEmitter.js", "src/**/*.js" ]
+				"src": [ "src/EventEmitter.js", "src/DisplayObject.js", "src/**/*.js" ]
 			}
 		},
 		"pkg": grunt.file.readJSON("package.json"),
