@@ -60,6 +60,10 @@
 					poly.stroke = "#f00";
 					poly.strokeWidth = 1;
 					stage.addChild( poly );
+					var centroid = poly.centroid;
+					var circle = new Circle( centroid.x, centroid.y, 5 );
+					circle.fill = "#f00";
+					stage.addChild( circle );
 				});
 				document.getElementById("txtOutput").value = generateOutput( triangles );
 			});
