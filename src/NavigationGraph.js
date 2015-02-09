@@ -35,12 +35,12 @@ class NavigationGraph {
 		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
 		 */
 		
-		// TODO: Add on endPoint onto path list
-		// TODO: Add path simplification
-		// TODO: Add triangle points to graph network
-		// TODO: Add edge centroids to graph network
-		// TODO: Remove triangle centroids
-		// TODO: Look at maybe restructuring nodes -> links
+		// TODO: Add on endPoint onto path list [Needs finishing]
+		// TODO: Add path simplification [Enhancement]
+		// TODO: Add triangle points to graph network [Fix]
+		// TODO: Add edge centroids to graph network [Fix]
+		// TODO: Remove triangle centroids [Update]
+		// TODO: Look at maybe restructuring nodes -> links [Enhancement]
 
 		let nodeQueue = new PriorityQueue(function( a, b ){
 			// Lowest priority == shortest distance
@@ -192,7 +192,7 @@ class NavigationGraph {
 		if( index === -1 ) return;
 		this.nodes.splice( index, 1 );
 		if( !includeLinks ) return;
-		// TODO: Remove links associated with node
+		// TODO: Remove links associated with node [Need finishing]
 	}
 
 }
