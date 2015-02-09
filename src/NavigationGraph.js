@@ -10,6 +10,97 @@ class NavigationGraph {
 		return ( this.links[ key ] = new NavigationLink( a, b, cost ) );
 	}
 
+	calculatePath( startPoint, endPoint ){
+
+		let path = [];
+
+		// Check if startPoint and endPoint are in the graph
+		let startNode = this.containsPoint( startPoint.x, startPoint.y );
+		if( startNode === undefined ) return false;
+		let endNode = this.containsPoint( endPoint.x, endPoint.y );
+		if( endNode === undefined ) return false;
+
+		// Add start and end point
+		path.push( startPoint, endPoint );
+
+		// Check if startPoint and endPoint are in same polygon
+		if( startNode._NODEID === endNode._NODEID ){
+			return path;
+		}
+
+
+
+		/**
+		 * Deeply influenced by:
+		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
+		 */
+		
+		// TODO: Add on endPoint onto path list
+		// TODO: Add path simplification
+		// TODO: Add triangle points to graph network
+		// TODO: Add edge centroids to graph network
+		// TODO: Remove triangle centroids
+		// TODO: Look at maybe restructuring nodes -> links
+
+		let nodeQueue = new PriorityQueue(function( a, b ){
+			// Lowest priority == shortest distance
+			return this.heap[ a ].priority > this.heap[ b ].priority;
+		});
+		// Add on the starting node
+		nodeQueue.push( startNode, 0 );
+
+		let came_from = {};
+		let cost_so_far = {};
+		let current = null;
+		let neighbours;
+		let new_cost;
+		let link;
+		let priority;
+
+		came_from[ startNode ] = null;
+		cost_so_far[ startNode ] = 0;
+
+		while( nodeQueue.length !== 0 ){
+			current = nodeQueue.pop();
+			if( current === endNode ) break;
+
+			neighbours = this.getNeighbours( current );
+			neighbours.forEach( next => {
+
+				link = this.links[ this.hasLink( current, next ) ];
+				new_cost = cost_so_far[ current ] + link.cost;
+
+				if( !cost_so_far.hasOwnProperty( next ) || new_cost < cost_so_far[ next ] ){
+
+					cost_so_far[ next ] = new_cost;
+					priority = new_cost + heuristic( endNode, next );
+					nodeQueue.push( next, priority );
+					came_from[ next ] = current;
+
+				}
+
+			} );
+
+		}
+
+		return get_path( came_from, startNode, endNode );
+
+		function get_path( came_from, startNode, endNode ){
+			var current = endNode;
+			var path = [ current ];
+			while( current !== startNode ){
+				current = came_from[ current ];
+				path.unshift( current );
+			}
+			return path;
+		}
+
+		function heuristic( a, b ){
+			return Math.abs( a.x - b.x ) + Math.abs( a.y - b.y );
+		}
+
+	}
+
 	constructor( nodes, links ){
 		this.links = {};
 		this.nodes = nodes || [];
