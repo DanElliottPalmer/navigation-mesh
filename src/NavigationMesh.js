@@ -25,9 +25,11 @@ class NavigationMesh extends EventEmitter {
 			poly = new Polygon( triangle.map( index => {
 				return points[ index ];
 			} ) );
+			/* DEBUG STUFF */
 			poly.fill = "none";
 			poly.strokeWidth = 1;
 			poly.stroke = "#f00";
+			/*     EOD     */
 			return poly;
 		} );
 
