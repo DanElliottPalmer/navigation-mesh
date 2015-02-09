@@ -20,10 +20,10 @@
 			renderer.on("click", function( e ){
 				var node = mesh.graph.containsPoint( e.offsetX, e.offsetY );
 				mesh.triangles.forEach(function(triangle){
-					triangle.stroke = "#f00";
+					triangle.fill = "none";
 				});
 				if( !node ) return;
-				node.triangle.stroke = "#00f";
+				node.triangle.fill = "rgba(0,0,255,0.2)";
 				renderGraph();
 			});
 
@@ -54,22 +54,22 @@
 				circle.fill = "#0f0";
 				var link = new Line( 0, 0, 0, 0 );
 				link.stroke = "#00f";
+				var node1;
+				var node2;
+				Object.keys( graph.links ).forEach(function( key ){
+					node1 = graph.getNodeById( graph.links[ key ].a );
+					node2 = graph.getNodeById( graph.links[ key ].b );
+					link.x1 = node1.x;
+					link.y1 = node1.y;
+					link.x2 = node2.x;
+					link.y2 = node2.y;
+					link.render( renderer.ctx );
+				});
 				graph.nodes.forEach(function( node ){
-					// Node
 					circle.cx = node.x;
 					circle.cy = node.y;
 					circle.render( renderer.ctx );	
-					// Links
-					node.neighbours.forEach(function( index ){
-						neighbour = graph.nodes[ index ];
-						link.x1 = node.x;
-						link.y1 = node.y;
-						link.x2 = neighbour.x;
-						link.y2 = neighbour.y;
-						link.render( renderer.ctx );
-					});
 				});
-
 			}
 			document.getElementById("btnGraph").addEventListener("click", renderGraph);
 

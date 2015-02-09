@@ -15,12 +15,12 @@ class NavigationMesh extends EventEmitter {
 		console.log( dataStructure );
 
 		// Parse points
-		var points = dataStructure.points.map( point => {
+		let points = dataStructure.points.map( point => {
 			return new Point( point[0], point[1] );
 		} );
 
 		// Parse polygons
-		var poly = null;
+		let poly = null;
 		this._triangles = dataStructure.triangles.map( triangle => {
 			poly = new Polygon( triangle.map( index => {
 				return points[ index ];
@@ -32,13 +32,19 @@ class NavigationMesh extends EventEmitter {
 		} );
 
 		// Parse graph network
-		var node;
-		var nodes = this._triangles.map( (triangle, index) => {
-			node = new NavigationNode( triangle );
-			node.neighbours = dataStructure.neighbours[ index ];
-			return node;
+		let nodes = this._triangles.map( triangle => {
+			return new NavigationNode( triangle );
 		} );
-		this._graph = new NavigationGraph( nodes );
+		let edges = [];
+		let node;
+		dataStructure.neighbours.forEach( ( neighbourIndices, index ) => {
+			node = nodes[ index ];
+			neighbourIndices.forEach( neighbourIndex => {
+				edges.push( new NavigationLink( node, nodes[ neighbourIndex ] ) );
+			} );
+		} );
+
+		this._graph = new NavigationGraph( nodes, edges );
 
 	}
 
