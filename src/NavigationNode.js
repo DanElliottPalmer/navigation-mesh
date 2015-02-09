@@ -3,7 +3,7 @@ class NavigationNode {
 
 	constructor( triangle ){
 		let { x, y } = triangle.centroid;
-		this._id = NavigationNodeID++;
+		this._NODEID = NavigationNodeID++;
 		this.neighbours = [];
 		this.triangle = triangle;
 		this.x = x >>> 0;
