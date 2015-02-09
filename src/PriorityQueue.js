@@ -5,16 +5,15 @@
 
 class PriorityQueue {
 
-	constructor(){
+	constructor( comparator ){
+		this._comparator = typeof comparator === "function" ? comparator : function( a, b ){
+			return this.heap[ a ].priority < this.heap[ b ].priority;
+		};
 		this.heap = [ null ];
 	}
 
 	get length(){
 		return this.heap.length - 1;
-	}
-
-	less( a, b ){
-		return this.heap[ a ].priority < this.heap[ b ].priority;
 	}
 
 	pop(){
@@ -33,10 +32,10 @@ class PriorityQueue {
 	sink( k ){
 		let j = k << 1;
 		while( j <= this.length ){
-			if( j < this.length && this.less( j, j + 1 ) ){
+			if( j < this.length && this._comparator( j, j + 1 ) ){
 				j++;
 			}
-			if( !this.less( k, j ) ) break;
+			if( !this._comparator( k, j ) ) break;
 			this.swap( k, j );
 			k = j;
 		}
@@ -52,7 +51,7 @@ class PriorityQueue {
 		let j = 0;
 		while( k > 1 ){
 			j = k >> 1;
-			if( !this.less( j, k ) ) break;
+			if( !this._comparator( j, k ) ) break;
 			this.swap( k, j );
 			k = j;
 		}
