@@ -1,15 +1,8 @@
-class PriorityQueueItem {
-
-	constructor( value, priority ){
-		this.priority = priority;
-		this.value = value;
-	}
-
-}
-
 /**
+ * Based from here:
  * http://algs4.cs.princeton.edu/24pq/
  */
+
 class PriorityQueue {
 
 	constructor(){
@@ -63,6 +56,15 @@ class PriorityQueue {
 			this.swap( k, j );
 			k = j;
 		}
+	}
+
+}
+
+class PriorityQueueItem {
+
+	constructor( value, priority ){
+		this.priority = priority;
+		this.value = value;
 	}
 
 }
