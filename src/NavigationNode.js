@@ -9,4 +9,8 @@ class NavigationNode {
 		this.y = y >>> 0;
 	}
 
+	toString(){
+		return `(${this.x},${this.y})`;
+	}
+
 }
