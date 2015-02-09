@@ -53,6 +53,20 @@ class NavigationGraph {
 		} );
 	}
 
+	getNeighbours( node ){
+		let links = this.getLinksByNode( node );
+		if( !links ) return;
+		let id = node._NODEID;
+		return links.map( link => {
+			if( link.a === id ){
+				// Give b
+				return this.getNodeById( link.b );
+			}
+			// Give a
+			return this.getNodeById( link.a );
+		} );
+	}
+
 	getNodeById( id ){
 		let length = this.nodes.length;
 		while( length-- ){
