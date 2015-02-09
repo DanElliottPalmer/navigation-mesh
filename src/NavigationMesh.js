@@ -39,14 +39,21 @@ class NavigationMesh extends EventEmitter {
 		} );
 		let edges = [];
 		let node;
+		let cost = 0;
 		dataStructure.neighbours.forEach( ( neighbourIndices, index ) => {
 			node = nodes[ index ];
 			neighbourIndices.forEach( neighbourIndex => {
-				edges.push( new NavigationLink( node, nodes[ neighbourIndex ] ) );
+				edges.push(
+					new NavigationLink( node, nodes[ neighbourIndex ], getDistance( node, nodes[ neighbourIndex ] ) )
+				);
 			} );
 		} );
 
 		this._graph = new NavigationGraph( nodes, edges );
+
+		function getDistance( a, b ){
+			return Math.sqrt( Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2) );
+		}
 
 	}
 
