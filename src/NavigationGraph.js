@@ -35,7 +35,6 @@ class NavigationGraph {
 		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
 		 */
 		
-		// TODO: Add on endPoint onto path list [Needs finishing]
 		// TODO: Add path simplification [Enhancement]
 		// TODO: Add triangle points to graph network [Fix]
 		// TODO: Add edge centroids to graph network [Fix]
@@ -83,7 +82,13 @@ class NavigationGraph {
 
 		}
 
-		return get_path( came_from, startNode, endNode );
+		// Add on the startPoint and endPoint
+		// TODO: Maybe turn these points into nodes or turn all the nodes into points
+		let path = get_path( came_from, startNode, endNode );
+		path.unshift( startPoint );
+		path.push( endPoint );
+
+		return path;
 
 		function get_path( came_from, startNode, endNode ){
 			var current = endNode;
