@@ -124,10 +124,23 @@
 
 			document.getElementById("btnPath").addEventListener("click", function(){
 				var path = mesh.graph.calculatePath( startPoint, endPoint );
-				path.forEach(function( node ){
-					node.triangle.fill = "#00FFD8";
-					node.triangle.render( renderer.ctx );
-					node.triangle.fill = "none";
+				var line = new Line();
+				line.strokeWidth = 5;
+				line.stroke = "#000";
+				// path.forEach(function( node ){
+				// 	node.triangle.fill = "#00FFD8";
+				// 	node.triangle.render( renderer.ctx );
+				// 	node.triangle.fill = "none";
+				// });
+				path.reduce(function( previous, current ){
+					if( previous !== null ){
+						line.x1 = previous.x;
+						line.y1 = previous.y;
+						line.x2 = current.x;
+						line.y2 = current.y;
+						line.render( renderer.ctx );
+					}
+					return current;
 				});
 			});
 			
