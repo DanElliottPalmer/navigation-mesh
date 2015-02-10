@@ -38,7 +38,6 @@ class NavigationGraph {
 		 */
 		
 		// TODO: Add path simplification [Enhancement]
-		// TODO: Add edge centroids to graph network [Fix]
 		// TODO: Look at maybe restructuring nodes -> links [Enhancement]
 
 		let nodeQueue = new PriorityQueue(function( a, b ){
