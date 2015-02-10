@@ -12,22 +12,15 @@ class NavigationGraph {
 
 	calculatePath( startPoint, endPoint ){
 
-		let path = [];
-
 		// Check if startPoint and endPoint are in the graph
 		let startNode = this.getClosestNode( startPoint.x, startPoint.y );
 		if( startNode === undefined ) return false;
 		let endNode = this.getClosestNode( endPoint.x, endPoint.y );
 		if( endNode === undefined ) return false;
 
-		console.log( startNode );
-
-		// Add start and end point
-		path.push( startPoint, endPoint );
-
 		// Check if startPoint and endPoint are in same polygon
 		if( startNode._NODEID === endNode._NODEID ){
-			return path;
+			return [ startPoint, startNode, endPoint ];
 		}
 
 
@@ -39,7 +32,7 @@ class NavigationGraph {
 		
 		// TODO: Add path simplification [Enhancement]
 		// TODO: Look at maybe restructuring nodes -> links [Enhancement]
-
+		let path;
 		let nodeQueue = new PriorityQueue(function( a, b ){
 			// Lowest priority == shortest distance
 			return this.heap[ a ].priority > this.heap[ b ].priority;
