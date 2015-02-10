@@ -1,8 +1,7 @@
 let NavigationNodeID = 0;
 class NavigationNode {
 
-	constructor( triangle ){
-		let { x, y } = triangle.centroid;
+	constructor( x, y, triangle ){
 		this._NODEID = NavigationNodeID++;
 		this.triangle = triangle;
 		this.x = x >>> 0;

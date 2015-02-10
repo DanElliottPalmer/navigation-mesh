@@ -33,23 +33,57 @@ class NavigationMesh extends EventEmitter {
 			return poly;
 		} );
 
-		// Parse graph network
-		let nodes = this._triangles.map( triangle => {
-			return new NavigationNode( triangle );
-		} );
-		let edges = [];
+		let nodes = [];
+		let links = [];
+
 		let node;
-		let cost = 0;
-		dataStructure.neighbours.forEach( ( neighbourIndices, index ) => {
-			node = nodes[ index ];
-			neighbourIndices.forEach( neighbourIndex => {
-				edges.push(
-					new NavigationLink( node, nodes[ neighbourIndex ], getDistance( node, nodes[ neighbourIndex ] ) )
-				);
+		let othernode;
+		let link
+		let cost;
+
+		let previousNodes = {};
+
+		this._triangles.forEach( triangle => {
+			triangle.points.forEach( ( point, index ) => {
+
+				// If node doesnt exist, create it
+				if( !previousNodes.hasOwnProperty( point ) ){
+					previousNodes[ point ] = new NavigationNode( point.x, point.y, triangle );
+					nodes.push( previousNodes[ point ] );
+				}
+				node = previousNodes[ point ];
+
+				// Links
+				switch( index ){
+					// If we are the first point, there wont be anything to link to
+					case 0:
+						return;
+
+					// If last point, we will let this fall through to do what the point
+					// before would do too
+					case 2:
+						othernode = previousNodes[ triangle.points[0] ];
+						link = new NavigationLink( node, othernode, getDistance( node, othernode ) );
+						links.push( link );
+
+					case 1:
+						othernode = previousNodes[ triangle.points[ index - 1 ] ];
+						link = new NavigationLink( node, othernode, getDistance( node, othernode ) );
+						links.push( link );
+						break;
+
+				}
+
 			} );
 		} );
 
-		this._graph = new NavigationGraph( nodes, edges );
+
+		// Graph
+		this._graph = new NavigationGraph( nodes, links );
+
+		// Clean up
+		previousNodes = null;
+		node = null;
 
 		function getDistance( a, b ){
 			return Math.sqrt( Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2) );

@@ -15,10 +15,12 @@ class NavigationGraph {
 		let path = [];
 
 		// Check if startPoint and endPoint are in the graph
-		let startNode = this.containsPoint( startPoint.x, startPoint.y );
+		let startNode = this.getClosestNode( startPoint.x, startPoint.y );
 		if( startNode === undefined ) return false;
-		let endNode = this.containsPoint( endPoint.x, endPoint.y );
+		let endNode = this.getClosestNode( endPoint.x, endPoint.y );
 		if( endNode === undefined ) return false;
+
+		console.log( startNode );
 
 		// Add start and end point
 		path.push( startPoint, endPoint );
@@ -36,9 +38,7 @@ class NavigationGraph {
 		 */
 		
 		// TODO: Add path simplification [Enhancement]
-		// TODO: Add triangle points to graph network [Fix]
 		// TODO: Add edge centroids to graph network [Fix]
-		// TODO: Remove triangle centroids [Update]
 		// TODO: Look at maybe restructuring nodes -> links [Enhancement]
 
 		let nodeQueue = new PriorityQueue(function( a, b ){
@@ -125,15 +125,19 @@ class NavigationGraph {
 
 	}
 
-	containsPoint( x, y ){
-		let len = this.nodes.length;
-		let point = new Point( x, y );
-		while( len-- ){
-			if( this.nodes[ len ].triangle.containsPoint( point ) ){
-				return this.nodes[ len ];
+	getClosestNode( x, y ){
+		let closestNode;
+		let closestDistance = Number.MAX_VALUE;
+		let currentDistance;
+		this.nodes.forEach( node => {
+			currentDistance = Math.sqrt( Math.pow( x - node.x, 2 ) + 
+																	Math.pow( y - node.y, 2 ) );
+			if( currentDistance < closestDistance ){
+				closestDistance = currentDistance;
+				closestNode = node;
 			}
-		}
-		return;
+		});
+		return closestNode;
 	}
 
 	getLinksByNode( node ){
