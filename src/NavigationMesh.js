@@ -2,8 +2,6 @@ class NavigationMesh extends EventEmitter {
 
 	calculatePath( startPoint, endPoint ){
 
-		// throw "ADD CONSTRAINED EDGE/EXTERIOR LINE CHECK. IF INTERSECTS CONSTRAINED INSTANTLY FAIL";
-
 		if( this.graph === null ) return false;
 
 		let graph = this.graph;
@@ -103,26 +101,16 @@ class NavigationMesh extends EventEmitter {
 			if( !(currentPoint instanceof Point) ){
 				nodeLinks = nodeLinks.concat( ( this.graph.getLinksByNode( currentPoint ) || [] ) );
 			}
-			// Remove any bounds to be skipped
-			// nodeLinks = nodeLinks.filter( link => {
-			// 	return !link.boundary;
-			// });
-			// nodeLinks = [];
+
 			nodeLinks.forEach( link => {
 				nodeA = this.graph.getNodeById( link.a );
 				nodeB = this.graph.getNodeById( link.b );
 				console.log( nodeA.toString(), nodeB.toString() );
 			} );
 
-			// let boundaryLinks = linkKeys.filter( key => {
-			// 	return true;
-			// } );
-			// jLen = boundaryLinks.length;
-			// console.log( boundaryLinks );
 			let nodeLinkIndex = -1;
 			let intersectionInsideCount = 0;
 			let intersectionOutsideCount = 0;
-			// console.log( "Node has " + nodeLinks.length + " links" );
 			while( ++j < jLen ){
 
 				link = links[ linkKeys[ j ] ];
@@ -146,16 +134,6 @@ class NavigationMesh extends EventEmitter {
 						intersectionInsideCount++;
 					}
 					
-					// if( link.boundary ){
-					// 	console.log( "Link is boundary and it was crossed!", nodeA.toString(), nodeB.toString() );
-					// 	// Update point
-					// 	console.log("boundary", lastPoint.toString());
-					// 	simplePath.push( lastPoint );
-					// 	currentPoint = lastPoint;
-					// 	lastPoint = nextPoint;
-					// 	break;
-					// }
-
 				}
 
 			}
