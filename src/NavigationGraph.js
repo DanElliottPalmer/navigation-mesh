@@ -77,8 +77,8 @@ class NavigationGraph {
 		// Add on the startPoint and endPoint
 		// TODO: Maybe turn these points into nodes or turn all the nodes into points
 		let path = get_path( came_from, startNode, endNode );
-		path[ 0 ] = startPoint;
-		path[ path.length - 1 ] = endPoint;
+		path.unshift( startPoint );
+		path.push( endPoint );
 
 		return path;
 
