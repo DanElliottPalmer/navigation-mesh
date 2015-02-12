@@ -181,8 +181,6 @@ class NavigationGraph {
 	removeLink( a, b ){
 		let key = "";
 		if( ( key = this.hasLink( a, b ) ) === false ) return;
-		let link = this.links[ key ];
-		link.destroy();
 		this.links[ key ] = null;
 		delete this.links[ key ];
 	}
