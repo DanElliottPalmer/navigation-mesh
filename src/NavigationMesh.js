@@ -9,7 +9,6 @@ class NavigationMesh extends EventEmitter {
 
 		// Simplify
 		if( pathPoints.length === 2 ) return pathPoints;
-		console.log( pathPoints );
 
 		let simplePath = [];
 
@@ -64,7 +63,6 @@ class NavigationMesh extends EventEmitter {
 				testPoint.x = currentPoint.x;
 				testPoint.y = currentPoint.y;
 			}
-			console.log("tris", triangles);
 			let containsPoint = triangles.some( triangle => {
 				return triangle.containsPoint( testPoint );
 			} );
@@ -101,12 +99,6 @@ class NavigationMesh extends EventEmitter {
 			if( !(currentPoint instanceof Point) ){
 				nodeLinks = nodeLinks.concat( ( this.graph.getLinksByNode( currentPoint ) || [] ) );
 			}
-
-			nodeLinks.forEach( link => {
-				nodeA = this.graph.getNodeById( link.a );
-				nodeB = this.graph.getNodeById( link.b );
-				console.log( nodeA.toString(), nodeB.toString() );
-			} );
 
 			let nodeLinkIndex = -1;
 			let intersectionInsideCount = 0;
