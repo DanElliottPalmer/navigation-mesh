@@ -1,10 +1,199 @@
 class NavigationMesh extends EventEmitter {
 
+	calculatePath( startPoint, endPoint ){
+
+		// throw "ADD CONSTRAINED EDGE/EXTERIOR LINE CHECK. IF INTERSECTS CONSTRAINED INSTANTLY FAIL";
+
+		if( this.graph === null ) return false;
+
+		let graph = this.graph;
+		let pathPoints = this.graph.calculatePath( startPoint, endPoint );
+
+		// Simplify
+		if( pathPoints.length === 2 ) return pathPoints;
+		console.log( pathPoints );
+
+		let simplePath = [];
+
+		// The current point in the path we checking - a
+		let currentPoint;
+		// The last point that tested successful
+		let lastPoint = null;
+		// The next point we're testing
+		let nextPoint;
+		// Store the links as we will use them a lot
+		let links = this.graph.links;
+		// Store all the keys of the links as we will probably loop over them a lot
+		let linkKeys = Object.keys( links );
+
+
+		// Set the currentPoint and store it
+		currentPoint = pathPoints.shift();
+		simplePath.push( currentPoint );
+
+		// Loop over all the points
+		let i = -1;
+		let len = pathPoints.length;
+		while( ++i < len ){
+
+			let nextPoint = pathPoints[ i ];
+			console.group( "New point", i, currentPoint.toString(), "->", nextPoint.toString() );
+
+			// If we're on the second point, it can reach so we can skip everything
+			if( lastPoint === null ){
+				console.log("Skipping point as second point");
+				lastPoint = pathPoints[ i ];
+				console.groupEnd();
+				continue;
+			}
+
+			// Check if the nextPoint and currentPoint share the same triangle
+			console.log("Performing a triangle check");
+			let triangles;
+			let testPoint = new Point();
+			if( nextPoint instanceof Point ){
+				if( currentPoint instanceof Point ){
+					triangles = this.triangles.filter( triangle => {
+						return triangle.containsPoint( new Point( currentPoint.x, currentPoint.y ) );
+					});
+				} else {
+					triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
+				}
+				testPoint.x = nextPoint.x;
+				testPoint.y = nextPoint.y;
+			} else {
+				triangles = this.getTrianglesByPoint( nextPoint.x, nextPoint.y );
+				testPoint.x = currentPoint.x;
+				testPoint.y = currentPoint.y;
+			}
+			console.log("tris", triangles);
+			let containsPoint = triangles.some( triangle => {
+				return triangle.containsPoint( testPoint );
+			} );
+			if( containsPoint ){
+				console.log("Share a triangle");
+				lastPoint = nextPoint;
+				console.groupEnd();
+				continue;
+			}
+
+			// Check if final point is a point as we can do triangle check
+			if( nextPoint instanceof Point ){
+				console.log("Performing a second triangle check");
+				triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
+				containsPoint = triangles.some( triangle => {
+					return triangle.containsPoint( new Point( nextPoint.x, nextPoint.y ) );
+				} );
+				if( containsPoint ){
+					console.log("Share a triangle");
+					lastPoint = nextPoint;
+					console.groupEnd();
+					continue;
+				}
+			}
+
+			console.log("Performing intersection check");
+			let j = -1;
+			let jLen = linkKeys.length;
+			let link;
+			let nodeA;
+			let nodeB;
+
+			let nodeLinks = ( this.graph.getLinksByNode( nextPoint ) || [] );
+			if( !(currentPoint instanceof Point) ){
+				nodeLinks = nodeLinks.concat( ( this.graph.getLinksByNode( currentPoint ) || [] ) );
+			}
+			// Remove any bounds to be skipped
+			// nodeLinks = nodeLinks.filter( link => {
+			// 	return !link.boundary;
+			// });
+			// nodeLinks = [];
+			nodeLinks.forEach( link => {
+				nodeA = this.graph.getNodeById( link.a );
+				nodeB = this.graph.getNodeById( link.b );
+				console.log( nodeA.toString(), nodeB.toString() );
+			} );
+
+			// let boundaryLinks = linkKeys.filter( key => {
+			// 	return true;
+			// } );
+			// jLen = boundaryLinks.length;
+			// console.log( boundaryLinks );
+			let nodeLinkIndex = -1;
+			let intersectionInsideCount = 0;
+			let intersectionOutsideCount = 0;
+			// console.log( "Node has " + nodeLinks.length + " links" );
+			while( ++j < jLen ){
+
+				link = links[ linkKeys[ j ] ];
+				nodeA = this.graph.getNodeById( link.a );
+				nodeB = this.graph.getNodeById( link.b );
+
+				if( ( nodeLinkIndex = nodeLinks.indexOf( link ) ) !== -1 ){
+					console.log("Skipping link as attached to node", nodeA.toString(), nodeB.toString());
+					nodeLinks.splice( nodeLinkIndex, 1 );
+					continue;
+				}			
+				
+				
+				if( lineIntersection( currentPoint, nextPoint, nodeA, nodeB ) ){
+
+					console.log( "Line intersection", nodeA.toString(), nodeB.toString() );
+
+					if( link.boundary ){
+						intersectionOutsideCount++;
+					} else {
+						intersectionInsideCount++;
+					}
+					
+					// if( link.boundary ){
+					// 	console.log( "Link is boundary and it was crossed!", nodeA.toString(), nodeB.toString() );
+					// 	// Update point
+					// 	console.log("boundary", lastPoint.toString());
+					// 	simplePath.push( lastPoint );
+					// 	currentPoint = lastPoint;
+					// 	lastPoint = nextPoint;
+					// 	break;
+					// }
+
+				}
+
+			}
+
+			console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
+			if( (intersectionInsideCount === 0 && intersectionOutsideCount === 0) ||
+					( intersectionOutsideCount > 0 ) ){
+				simplePath.push( lastPoint );
+				currentPoint = lastPoint;
+			}
+
+			lastPoint = nextPoint;
+
+			console.groupEnd();
+
+		}
+
+		if( lastPoint !== null ){
+			simplePath.push( lastPoint );
+		}
+
+		return simplePath;
+
+	}
+
 	constructor(){
 		super();
 
 		this._graph = null;
 		this._triangles = [];
+	}
+
+	getTrianglesByPoint( x, y ){
+		return this.triangles.filter( triangle => {
+			return triangle.points.some( point => {
+				return point.x === x && point.y === y;
+			} );
+		} );
 	}
 
 	get graph(){
@@ -117,3 +306,20 @@ class NavigationMesh extends EventEmitter {
 	}
 
 }
+
+/**
+ * Taken from my polygon bit but I should really comment this and explain
+ * why this works
+ * Found these stackOverflows that might help with guidance:
+ * http://stackoverflow.com/a/16725715
+ * http://stackoverflow.com/a/565282
+ */
+function lineIntersection( point1, point2, point3, point4 ){
+
+	function ccw(x, y, z) {
+		return (z.y-x.y) * (y.x-x.x) >= (y.y-x.y) * (z.x-x.x);
+	}
+
+	return ccw(point1, point3, point4) !== ccw(point2, point3, point4) &&
+			ccw(point1, point2, point3) !== ccw(point1, point2, point4);
+};
