@@ -30,7 +30,6 @@ class NavigationGraph {
 		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
 		 */
 		
-		// TODO: Add path simplification [Enhancement]
 		// TODO: Look at maybe restructuring nodes -> links [Enhancement]
 		let path;
 		let nodeQueue = new PriorityQueue(function( a, b ){
