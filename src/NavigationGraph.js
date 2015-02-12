@@ -187,12 +187,20 @@ class NavigationGraph {
 		delete this.links[ key ];
 	}
 
-	removeNode( node, includeLinks ){
+	removeNode( node ){
+		
+		let links = this.getLinksByNode( node );
+		if( links && links.length > 0 ) {
+			links.forEach( link => {
+				this.removeLink( this.getNodeById( link.a ), this.getNodeById( link.b ) );
+			} );
+			links = null;
+		}
+
 		let index = this.nodes.indexOf( node );
 		if( index === -1 ) return;
 		this.nodes.splice( index, 1 );
-		if( !includeLinks ) return;
-		// TODO: Remove links associated with node [Need finishing]
+		
 	}
 
 }
