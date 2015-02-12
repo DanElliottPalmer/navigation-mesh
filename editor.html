@@ -141,7 +141,7 @@
 					while( ++i < 3 ){
 						edgeIndex = triangle.edgeIndex( points[ i ], points[ j ] );
 						if( triangle.constrained_edge[ edgeIndex ] ){
-							triangleBounds.push( [ i, j ] );
+							triangleBounds.push( [ pointLookup[ points[ i ] ], pointLookup[ points[ j ] ] ] );
 						}
 						j = i;
 					}
