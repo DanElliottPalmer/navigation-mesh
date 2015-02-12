@@ -93,15 +93,18 @@
 			function generateOutput( triangles ){
 				console.log( triangles );
 				var output = {
+					"boundaries": [],
 					"neighbours": [],
 					"points": [],
 					"triangles": []
 				};
+				var points;
 				var pointLookup = {};
 				var pointIndex = -1;
 				var pointString = null;
 				var triangleIndices = null;
 				var triangleNeighbours = [];
+				var triangleBounds = [];
 				// Add ids to triangles
 				triangles = triangles.map(function( triangle, index ){
 					triangle._ID = index;
@@ -109,8 +112,11 @@
 				});
 				// Work out shared points
 				triangles.forEach(function( triangle ){
+					points = triangle.getPoints();
 					triangleIndices = [];
-					triangle.getPoints().forEach(function( point ){
+					triangleBounds = [];
+					// Points and indices
+					points.forEach(function( point ){
 						pointIndex = -1;
 						pointString = point.toString();
 						if( !pointLookup.hasOwnProperty( pointString ) ){
@@ -122,13 +128,26 @@
 						}
 						triangleIndices.push( pointIndex );
 					});
+					// Neighbours
 					triangleNeighbours = [];
 					triangle.neighbors_.forEach(function( neighbor ){
 						if( neighbor === null || !neighbor.isInterior() ) return;
 						triangleNeighbours.push( neighbor._ID );
 					});
+					// Boundaries
+					var i = -1;
+					var j = 2;
+					var edgeIndex;
+					while( ++i < 3 ){
+						edgeIndex = triangle.edgeIndex( points[ i ], points[ j ] );
+						if( triangle.constrained_edge[ edgeIndex ] ){
+							triangleBounds.push( [ i, j ] );
+						}
+						j = i;
+					}
 					output.neighbours.push( triangleNeighbours );
 					output.triangles.push( triangleIndices );
+					output.boundaries.push( triangleBounds );
 				});
 				return JSON.stringify( output );
 			}
