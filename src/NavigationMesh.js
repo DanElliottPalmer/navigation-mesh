@@ -40,11 +40,12 @@ class NavigationMesh extends EventEmitter {
 		let othernode;
 		let link
 		let cost;
+		let boundaries;
 
 		let previousNodes = {};
 
-		this._triangles.forEach( triangle => {
-			triangle.points.forEach( ( point, index ) => {
+		this._triangles.forEach( ( triangle, triIndex ) => {
+			triangle.points.forEach( ( point, pointIndex ) => {
 
 				// If node doesnt exist, create it
 				if( !previousNodes.hasOwnProperty( point ) ){
@@ -54,7 +55,7 @@ class NavigationMesh extends EventEmitter {
 				node = previousNodes[ point ];
 
 				// Links
-				switch( index ){
+				switch( pointIndex ){
 					// If we are the first point, there wont be anything to link to
 					case 0:
 						return;
@@ -67,7 +68,7 @@ class NavigationMesh extends EventEmitter {
 						links.push( link );
 
 					case 1:
-						othernode = previousNodes[ triangle.points[ index - 1 ] ];
+						othernode = previousNodes[ triangle.points[ pointIndex - 1 ] ];
 						link = new NavigationLink( node, othernode, getDistance( node, othernode ) );
 						links.push( link );
 						break;
@@ -75,6 +76,21 @@ class NavigationMesh extends EventEmitter {
 				}
 
 			} );
+
+			// Boundaries
+			boundaries = dataStructure.boundaries[ triIndex ];
+			let len = links.length;
+			let i;
+			boundaries.forEach( boundary => {
+				i = len - 4; // Go back 3 + 1 which increments at the start of loop
+				while( ++i < len ){
+					if( isLink( links[i], boundary[0], boundary[1] ) ){
+						links[i].boundary = true;
+						return;
+					}
+				}
+			} );
+
 		} );
 
 
@@ -84,6 +100,11 @@ class NavigationMesh extends EventEmitter {
 		// Clean up
 		previousNodes = null;
 		node = null;
+
+		function isLink( link, a, b ){
+			return ( link.a === a && link.b === b ) ||
+						 ( link.a === b && link.b === a );
+		}
 
 		function getDistance( a, b ){
 			return Math.sqrt( Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2) );
