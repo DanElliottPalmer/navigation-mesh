@@ -6,18 +6,161 @@
 	<head>  
 		<meta charset="utf-8">
 		<title></title>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style type="text/css">
+			.group {
+				border-bottom: 1px solid #ccc;
+				padding: 10px 0;
+			}
+			.group h3 {
+				margin: 0 0 10px 0;
+			}
+		</style>
 	</head>
 	<body>
 		<canvas id="domCanvas" width="800" height="400" style="border: 1px solid #f00"></canvas> <br />
-		<textarea cols="50" rows="10" id="txtInput">{"boundaries":[[[0,2],[1,0]],[[3,1]],[[2,4]],[[5,3]],[],[[7,5]],[[6,8]],[[9,7]],[[8,10]],[[10,11]],[[12,9]],[[13,12]],[[11,6]],[[4,13]]],"neighbours":[[1],[2,0],[1,3],[2,4],[13,3,5],[4,6],[5,7],[8,6],[7,9],[10,8],[11,9],[12,10],[13,11],[4,12]],"points":[[268,343],[79,332],[245,131],[80,53],[504,135],[675,64],[606,262],[691,336],[615,309],[376,336],[434,308],[435,264],[365,233],[505,231]],"triangles":[[0,1,2],[1,3,2],[4,2,3],[5,4,3],[5,6,4],[7,6,5],[7,8,6],[7,9,8],[9,10,8],[10,9,11],[11,9,12],[11,12,13],[11,13,6],[6,13,4]]}</textarea>
-		<button id="btnParse">Parse</button>
-		<button id="btnGraph">Render graph</button>
-		<button id="btnStart">Start point</button>
-		<button id="btnEnd">End point</button>
-		<button id="btnPath">Show path</button>
+
+		<div class="group">
+			<h3>Mesh</h3>
+			<textarea cols="50" rows="10" id="txtInput">{"boundaries":[[[0,2],[1,0]],[[3,1]],[[2,4]],[[5,3]],[],[[7,5]],[[6,8]],[[9,7]],[[8,10]],[[10,11]],[[12,9]],[[13,12]],[[11,6]],[[4,13]]],"neighbours":[[1],[2,0],[1,3],[2,4],[13,3,5],[4,6],[5,7],[8,6],[7,9],[10,8],[11,9],[12,10],[13,11],[4,12]],"points":[[268,343],[79,332],[245,131],[80,53],[504,135],[675,64],[606,262],[691,336],[615,309],[376,336],[434,308],[435,264],[365,233],[505,231]],"triangles":[[0,1,2],[1,3,2],[4,2,3],[5,4,3],[5,6,4],[7,6,5],[7,8,6],[7,9,8],[9,10,8],[10,9,11],[11,9,12],[11,12,13],[11,13,6],[6,13,4]]}</textarea>
+			<br />
+			<button id="btnParse">Parse</button>
+		</div>
+		
+		<div class="group">
+			<h3>Graph network</h3>
+			<label for="chkRenderGraph"><input type="checkbox" id="chkRenderGraph" /> Render graph network</label>
+			<button id="btnGraph">Render graph</button>
+		</div>
+		
+		<div class="group">
+			<h3>Pathfinding</h3>
+			<label for="chkRandomPoints"><input type="checkbox" id="chkRandomPoints" /> Test random points</label>
+			<!-- <button id="btnStart">Start point</button>
+			<button id="btnEnd">End point</button>
+			<button id="btnPath">Show path</button> -->
+		</div>
+		
 		<script src="dist/NavigationMesh.js"></script>
+		<script src="dist/debug.js"></script>
 		<script type="text/javascript">
+
+			var isGraphParsed = false;
+			var testRandomPoints = false;
+
+			var tmrRandomPoints = null;
+
+			var mesh = null;
+
+			document.getElementById("chkRandomPoints").addEventListener("change", function onTestPointsChange(){
+				testRandomPoints = this.checked;
+				if( !testRandomPoints && tmrRandomPoints !== null ){
+					clearInterval( tmrRandomPoints );
+					tmrRandomPoints = null;
+					return;
+				}
+				if( isGraphParsed ){
+					randomPointTest();
+					tmrRandomPoints = setInterval( randomPointTest, 3000 );
+				}
+			});
+
+			document.getElementById("btnParse").addEventListener("click", function(){
+				mesh = new NavigationMesh();
+				mesh.parse( JSON.parse( document.getElementById("txtInput").value ) );
+				stage.addChild( mesh.triangles.map(function(triangle){
+					var poly = new Polygon( triangle.points );
+					poly.fill = "none";
+					poly.stroke = "#f00";
+					poly.strokeWidth = 1;
+					return poly;
+				}) );
+				renderer.render();
+				isGraphParsed = true;
+			});
+
+			function randomPointTest(){
+				// Get random triangle for the start and end
+				var startRandomTri = mesh.triangles[ ~~random( 0, mesh.triangles.length ) ];
+				var endRandomTri = mesh.triangles[ ~~random( 0, mesh.triangles.length ) ];
+				// Get random point in triangle
+				var startPoint = randomPointInTriangle(
+					[ startRandomTri.points[0].x, startRandomTri.points[0].y ],
+					[ startRandomTri.points[1].x, startRandomTri.points[1].y ],
+					[ startRandomTri.points[2].x, startRandomTri.points[2].y ]
+				);
+				var endPoint = randomPointInTriangle(
+					[ endRandomTri.points[0].x, endRandomTri.points[0].y ],
+					[ endRandomTri.points[1].x, endRandomTri.points[1].y ],
+					[ endRandomTri.points[2].x, endRandomTri.points[2].y ]
+				);
+
+				console.clear();
+				renderer.clear();
+				renderer.render();
+				var path = mesh.calculatePath( new NavigationPoint( startPoint[0], startPoint[1] ), new NavigationPoint( endPoint[0], endPoint[1] ) );
+				var line = new Line();
+				line.strokeWidth = 5;
+				line.stroke = "#000";
+				path.reduce(function( previous, current ){
+					if( previous !== null ){
+						line.x1 = previous.x;
+						line.y1 = previous.y;
+						line.x2 = current.x;
+						line.y2 = current.y;
+						line.render( renderer.ctx );
+					}
+					return current;
+				});
+			}
+
+			function random( min, max ){
+				return min + Math.random() * ( max - min );
+			}
+
+			function randomPointInTriangle( a, b, c ){
+			
+				var ab = [0,0];
+				var ac = [0,0];
+
+				ab[0] = b[0] - a[0];
+				ab[1] = b[1] - a[1];
+				ac[0] = c[0] - a[0];
+				ac[1] = c[1] - a[1];
+
+				var r = random( 0, 1 );
+				var s = random( 0, 1 );
+
+				if( r + s >= 1 ){
+					r = 1 - r;
+					s = 1 - s;
+				}
+
+				ab[0] *= r;
+				ab[1] *= r;
+				ac[0] *= s;
+				ac[1] *= s;
+
+				return [
+					a[0] + ab[0] + ac[0],
+					a[1] + ab[1] + ac[1]
+				];
+
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 			var startPoint = new Point( 0, 0 );
 			var endPoint = new Point( 0, 0 );
@@ -73,14 +216,7 @@
 			var stage = new Stage();
 			renderer.stage = stage;
 
-			var mesh = null;
-
-			document.getElementById("btnParse").addEventListener("click", function(){
-				mesh = new NavigationMesh();
-				mesh.parse( JSON.parse( document.getElementById("txtInput").value ) );
-				stage.addChild( mesh.triangles );
-				renderer.render();
-			});
+			
 
 
 			/**
@@ -133,28 +269,6 @@
 			});
 			document.getElementById("btnEnd").addEventListener("click", function(){
 				MODE = MODES.END;
-			});
-
-			document.getElementById("btnPath").addEventListener("click", function(){
-				var path = mesh.calculatePath( startPoint, endPoint );
-				var line = new Line();
-				line.strokeWidth = 5;
-				line.stroke = "#000";
-				// path.forEach(function( node ){
-				// 	node.triangle.fill = "#00FFD8";
-				// 	node.triangle.render( renderer.ctx );
-				// 	node.triangle.fill = "none";
-				// });
-				path.reduce(function( previous, current ){
-					if( previous !== null ){
-						line.x1 = previous.x;
-						line.y1 = previous.y;
-						line.x2 = current.x;
-						line.y2 = current.y;
-						line.render( renderer.ctx );
-					}
-					return current;
-				});
 			});
 			
 		</script>
