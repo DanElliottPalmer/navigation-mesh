@@ -1,4 +1,4 @@
-class NavigationMesh extends EventEmitter {
+class NavigationMesh {
 
 	calculatePath( startPoint, endPoint ){
 
