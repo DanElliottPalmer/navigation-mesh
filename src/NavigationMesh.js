@@ -47,11 +47,11 @@ class NavigationMesh {
 			// Check if the nextPoint and currentPoint share the same triangle
 			console.log("Performing a triangle check");
 			let triangles;
-			let testPoint = new Point();
-			if( nextPoint instanceof Point ){
-				if( currentPoint instanceof Point ){
+			let testPoint = new NavigationPoint();
+			if( nextPoint instanceof NavigationPoint ){
+				if( currentPoint instanceof NavigationPoint ){
 					triangles = this.triangles.filter( triangle => {
-						return triangle.containsPoint( new Point( currentPoint.x, currentPoint.y ) );
+						return triangle.containsPoint( new NavigationPoint( currentPoint.x, currentPoint.y ) );
 					});
 				} else {
 					triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
@@ -74,11 +74,11 @@ class NavigationMesh {
 			}
 
 			// Check if final point is a point as we can do triangle check
-			if( nextPoint instanceof Point ){
+			if( nextPoint instanceof NavigationPoint ){
 				console.log("Performing a second triangle check");
 				triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
 				containsPoint = triangles.some( triangle => {
-					return triangle.containsPoint( new Point( nextPoint.x, nextPoint.y ) );
+					return triangle.containsPoint( new NavigationPoint( nextPoint.x, nextPoint.y ) );
 				} );
 				if( containsPoint ){
 					console.log("Share a triangle");
@@ -96,7 +96,7 @@ class NavigationMesh {
 			let nodeB;
 
 			let nodeLinks = ( this.graph.getLinksByNode( nextPoint ) || [] );
-			if( !(currentPoint instanceof Point) ){
+			if( !(currentPoint instanceof NavigationPoint) ){
 				nodeLinks = nodeLinks.concat( ( this.graph.getLinksByNode( currentPoint ) || [] ) );
 			}
 
@@ -175,7 +175,7 @@ class NavigationMesh {
 
 		// Parse points
 		let points = dataStructure.points.map( point => {
-			return new Point( point[0], point[1] );
+			return new NavigationPoint( point[0], point[1] );
 		} );
 
 		// Parse polygons
