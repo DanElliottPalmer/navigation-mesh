@@ -2,11 +2,6 @@ module.exports = function( grunt ) {
 
 	grunt.initConfig({
 		"6to5": {
-			"debug": {
-				"files": {
-					"dist/debug.js": "dist/debug-es6.js"
-				}
-			},
 			"dist": {
 				"files": {
 					"dist/NavigationMesh.js": "dist/NavigationMesh-es6.js"
@@ -20,10 +15,6 @@ module.exports = function( grunt ) {
 			"dist": {
 				"dest": "dist/NavigationMesh-es6.js",
 				"src": [ "src/**/*.js" ]
-			},
-			"debug": {
-				"dest": "dist/debug-es6.js",
-				"src": [ "debug/EventEmitter.js", "debug/DisplayObject.js", "debug/**/*.js" ]
 			}
 		},
 		"pkg": grunt.file.readJSON("package.json"),
@@ -44,6 +35,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks("grunt-6to5");
 
 	// Default task(s).
-	grunt.registerTask("default", [ "concat:dist", "6to5:dist", "concat:debug", "6to5:debug" ]);
+	grunt.registerTask("default", [ "concat:dist", "6to5:dist" ]);
 
 };
