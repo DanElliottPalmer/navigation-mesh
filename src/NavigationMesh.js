@@ -116,7 +116,7 @@ class NavigationMesh {
 				}			
 				
 				
-				if( lineIntersection( currentPoint, nextPoint, nodeA, nodeB ) ){
+				if( NavigationTriangle.intersection( currentPoint, nextPoint, nodeA, nodeB ) ){
 
 					console.log( "Line intersection", nodeA.toString(), nodeB.toString() );
 
@@ -181,7 +181,7 @@ class NavigationMesh {
 		// Parse polygons
 		let poly = null;
 		this._triangles = dataStructure.triangles.map( triangle => {
-			poly = new Polygon( triangle.map( index => {
+			poly = new NavigationTriangle( triangle.map( index => {
 				return points[ index ];
 			} ) );
 			/* DEBUG STUFF */
