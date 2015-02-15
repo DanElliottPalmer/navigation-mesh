@@ -7,7 +7,7 @@ class NavigationGraph {
 	addLink( a, b, cost ){
 		if( this.hasLink( a, b ) ) return;
 		let key = generateLinkKeyFromNode( a, b );
-		return ( this.links[ key ] = new NavigationLink( a, b, cost ) );
+		return ( this.links[ key ] = new NavigationEdge( a, b, cost ) );
 	}
 
 	calculatePath( startPoint, endPoint ){

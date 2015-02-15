@@ -223,12 +223,12 @@ class NavigationMesh {
 					// before would do too
 					case 2:
 						othernode = previousNodes[ triangle.points[0] ];
-						link = new NavigationLink( node, othernode, getDistance( node, othernode ) );
+						link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
 						links.push( link );
 
 					case 1:
 						othernode = previousNodes[ triangle.points[ pointIndex - 1 ] ];
-						link = new NavigationLink( node, othernode, getDistance( node, othernode ) );
+						link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
 						links.push( link );
 						break;
 

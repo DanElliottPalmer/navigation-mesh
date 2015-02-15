@@ -1,4 +1,4 @@
-class NavigationLink {
+class NavigationEdge {
 
 	get a(){
 		return this._a;
