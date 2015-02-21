@@ -35,9 +35,9 @@
 		<div class="group">
 			<h3>Pathfinding</h3>
 			<label for="chkRandomPoints"><input type="checkbox" id="chkRandomPoints" /> Test random points</label> <br />
-			<!-- <button id="btnStart">Start point</button>
+			<button id="btnStart">Start point</button>
 			<button id="btnEnd">End point</button>
-			<button id="btnPath">Show path</button> -->
+			<button id="btnPath">Show path</button>
 		</div>
 		
 		<script src="dist/NavigationMesh.js"></script>
@@ -49,9 +49,13 @@
 			var tmrRandomPoints = null;
 
 			var isRenderGraph = false;
+			var isStartPoint = false;
+			var isEndPoint = false;
 
 			var mesh = null;
 			var path = null;
+			var startPoint = null;
+			var endPoint = null;
 
 			document.getElementById("chkRenderGraph").addEventListener("change", function onRenderGraphChange(){
 				isRenderGraph = this.checked;
@@ -59,6 +63,8 @@
 
 			document.getElementById("chkRandomPoints").addEventListener("change", function onTestPointsChange(){
 				testRandomPoints = this.checked;
+				startPoint = null;
+				endPoint = null;
 				if( !testRandomPoints && tmrRandomPoints !== null ){
 					clearInterval( tmrRandomPoints );
 					tmrRandomPoints = null;
@@ -66,7 +72,7 @@
 				}
 				if( isGraphParsed ){
 					randomPointTest();
-					tmrRandomPoints = setInterval( randomPointTest, 3000 );
+					tmrRandomPoints = setInterval( randomPointTest, 5000 );
 				}
 			});
 
@@ -75,6 +81,61 @@
 				mesh.parse( JSON.parse( document.getElementById("txtInput").value ) );
 				isGraphParsed = true;
 			});
+
+			document.getElementById("btnStart").addEventListener("click", function(){
+				if( testRandomPoints ){
+					document.getElementById("chkRandomPoints").checked = testRandomPoints = false;
+					clearInterval( tmrRandomPoints );
+					tmrRandomPoints = null;
+				}
+				isStartPoint = true;
+				isEndPoint = false;
+			});
+			document.getElementById("btnEnd").addEventListener("click", function(){
+				if( testRandomPoints ){
+					document.getElementById("chkRandomPoints").checked = testRandomPoints = false;
+					clearInterval( tmrRandomPoints );
+					tmrRandomPoints = null;
+				}
+				isEndPoint = true;
+				isStartPoint = false;
+			});
+			document.getElementById("btnPath").addEventListener("click", function(){
+				if( startPoint === null || endPoint === null ){
+					return;
+				}
+				console.clear();
+				path = mesh.calculatePath( startPoint, endPoint );
+			});
+
+			document.getElementById("domCanvas").addEventListener("click", function( e ){
+				if( !isStartPoint && !isEndPoint ) return;
+
+				var ev = processEvent( e );
+
+				if( isStartPoint ){
+					startPoint = new NavigationPoint( e.x, e.y );
+				} else if( isEndPoint ){
+					endPoint = new NavigationPoint( e.x, e.y );
+				}
+
+				isStartPoint = false;
+				isEndPoint = false;
+			});
+
+			function processEvent( e ){
+				var newEvent = {
+					"originalEvent": e,
+					"x": e.offsetX,
+					"y": e.offsetY
+				};
+				// TODO: this partially works
+				if( e.offsetX === undefined ){
+					newEvent.x = e.clientX - e.target.offsetLeft;
+					newEvent.y = e.clientY - e.target.offsetTop;
+				}
+				return newEvent;
+			}
 
 			function randomPointTest(){
 				// Get random triangle for the start and end
