@@ -95,9 +95,9 @@ class NavigationMesh {
 			let nodeA;
 			let nodeB;
 
-			let nodeLinks = ( this.graph.getLinksByNode( nextPoint ) || [] );
+			let nodeLinks = ( nextPoint.links && nextPoint.links.slice(0) || [] );
 			if( !(currentPoint instanceof NavigationPoint) ){
-				nodeLinks = nodeLinks.concat( ( this.graph.getLinksByNode( currentPoint ) || [] ) );
+				nodeLinks = nodeLinks.concat( ( currentPoint.links || [] ) );
 			}
 
 			let nodeLinkIndex = -1;
