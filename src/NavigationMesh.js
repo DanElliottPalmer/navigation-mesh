@@ -208,7 +208,7 @@ class NavigationMesh {
 
 				// If node doesnt exist, create it
 				if( !previousNodes.hasOwnProperty( point ) ){
-					previousNodes[ point ] = new NavigationNode( point.x, point.y, triangle );
+					previousNodes[ point ] = new NavigationNode( point.x, point.y );
 					nodes.push( previousNodes[ point ] );
 				}
 				node = previousNodes[ point ];

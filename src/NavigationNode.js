@@ -1,10 +1,9 @@
 let NavigationNodeID = 0;
 class NavigationNode {
 
-	constructor( x, y, triangle ){
+	constructor( x, y ){
 		this.id = NavigationNodeID++;
 		this.links = [];
-		this.triangle = triangle;
 		this.triangles = [];
 		this.x = x >>> 0;
 		this.y = y >>> 0;
