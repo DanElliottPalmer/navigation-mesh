@@ -15,6 +15,9 @@ class NavigationEdge {
 		this.boundary = false;
 		this.node1 = a;
 		this.node2 = b;
+
+		this.node1.links.push( this );
+		this.node2.links.push( this );
 	}
 
 	get cost(){
@@ -22,8 +25,23 @@ class NavigationEdge {
 	}
 
 	destroy(){
+
+		removeLink( this.node1, this );
+		removeLink( this.node2, this );
+
 		this.node1 = null;
 		this.node2 = null;
+
+		function removeLink( node, link ){
+			let len = node.links.length;
+			while( len-- ){
+				if( node.links[ len ] === link ){
+					node.links.splice( len, 1 );
+					return;
+				}
+			}
+		}
+
 	}
 	
 }
