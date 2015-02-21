@@ -30,12 +30,11 @@
 		<div class="group">
 			<h3>Graph network</h3>
 			<label for="chkRenderGraph"><input type="checkbox" id="chkRenderGraph" /> Render graph network</label>
-			<button id="btnGraph">Render graph</button>
 		</div>
 		
 		<div class="group">
 			<h3>Pathfinding</h3>
-			<label for="chkRandomPoints"><input type="checkbox" id="chkRandomPoints" /> Test random points</label>
+			<label for="chkRandomPoints"><input type="checkbox" id="chkRandomPoints" /> Test random points</label> <br />
 			<!-- <button id="btnStart">Start point</button>
 			<button id="btnEnd">End point</button>
 			<button id="btnPath">Show path</button> -->
@@ -49,8 +48,14 @@
 
 			var tmrRandomPoints = null;
 
+			var isRenderGraph = false;
+
 			var mesh = null;
 			var path = null;
+
+			document.getElementById("chkRenderGraph").addEventListener("change", function onRenderGraphChange(){
+				isRenderGraph = this.checked;
+			});
 
 			document.getElementById("chkRandomPoints").addEventListener("change", function onTestPointsChange(){
 				testRandomPoints = this.checked;
@@ -147,7 +152,7 @@
 			}
 
 			function renderGraph(){
-				if( mesh === null ) return;
+				if( !isRenderGraph || mesh === null ) return;
 				ctx.save();
 				// Render nodes
 				ctx.fillStyle = "#0f0";
