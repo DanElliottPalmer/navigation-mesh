@@ -2,19 +2,6 @@ class NavigationGraph {
 
 	calculatePath( startPoint, endPoint ){
 
-		// Check if startPoint and endPoint are in the graph
-		let startNode = this.getClosestNode( startPoint.x, startPoint.y );
-		if( startNode === undefined ) return false;
-		let endNode = this.getClosestNode( endPoint.x, endPoint.y );
-		if( endNode === undefined ) return false;
-
-		// Check if startPoint and endPoint are in same polygon
-		if( startNode.id === endNode.id ){
-			return [ startPoint, startNode, endPoint ];
-		}
-
-
-
 		/**
 		 * Deeply influenced by:
 		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
@@ -27,7 +14,11 @@ class NavigationGraph {
 			return this.heap[ a ].priority > this.heap[ b ].priority;
 		});
 		// Add on the starting node
-		nodeQueue.push( startNode, 0 );
+		nodeQueue.push( startPoint, 0 );
+
+		let endPoints = this.mesh.triangles.filter( triangle => {
+			return triangle.containsPoint( endPoint );
+		})[0].points;
 
 		let came_from = {};
 		let cost_so_far = {};
@@ -37,23 +28,43 @@ class NavigationGraph {
 		let link;
 		let priority;
 
-		came_from[ startNode ] = null;
-		cost_so_far[ startNode ] = 0;
+		let link_cost = 0;
+		let isPoint = false;
+		let endPointIndex = -1;
+
+		came_from[ startPoint ] = null;
+		cost_so_far[ startPoint ] = 0;
 
 		while( nodeQueue.length !== 0 ){
 			current = nodeQueue.pop();
-			if( current === endNode ) break;
+			// if( current === endPoint ) break;
+			if( ( endPointIndex = endPoints.indexOf( current ) ) !== -1 ) break;
 
-			neighbours = this.getNeighbours( current );
+			isPoint = !( current instanceof NavigationNode );
+
+			if( isPoint ){
+				neighbours = this.mesh.triangles.filter( triangle => {
+					return triangle.containsPoint( current );
+				})[0].points;
+			} else {
+				neighbours = this.getNeighbours( current );	
+			}
+			
 			neighbours.forEach( next => {
+				// console.log("next", next);
 
-				link = this.links[ this.hasLink( current, next ) ];
-				new_cost = cost_so_far[ current ] + link.cost;
+				if( isPoint ){
+					link_cost = getDistance( current, next );
+				} else {
+					link_cost = this.links[ this.hasLink( current, next ) ].cost;
+				}
+
+				new_cost = cost_so_far[ current ] + link_cost;
 
 				if( !cost_so_far.hasOwnProperty( next ) || new_cost < cost_so_far[ next ] ){
 
 					cost_so_far[ next ] = new_cost;
-					priority = new_cost + heuristic( endNode, next );
+					priority = new_cost + heuristic( endPoint, next );
 					nodeQueue.push( next, priority );
 					came_from[ next ] = current;
 
@@ -65,11 +76,15 @@ class NavigationGraph {
 
 		// Add on the startPoint and endPoint
 		// TODO: Maybe turn these points into nodes or turn all the nodes into points
-		let path = get_path( came_from, startNode, endNode );
-		path.unshift( startPoint );
+		let path = get_path( came_from, startPoint, endPoints[ endPointIndex ] );
+		// path.unshift( startPoint );
 		path.push( endPoint );
 
 		return path;
+
+		function getDistance( a, b ){
+			return Math.sqrt( Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2) );
+		}
 
 		function get_path( came_from, startNode, endNode ){
 			var current = endNode;
@@ -87,8 +102,9 @@ class NavigationGraph {
 
 	}
 
-	constructor( nodes, links ){
+	constructor( mesh, nodes, links ){
 		this.links = links || {};
+		this.mesh = mesh;
 		this.nodes = nodes || [];
 	}
 
@@ -107,30 +123,16 @@ class NavigationGraph {
 		return closestNode;
 	}
 
-	getLinksByNode( node ){
-		let keys = Object.keys( this.links );
-		if( keys.length === 0 ) return;
-		let re = new RegExp( "((^" + node.id + ",)|(," + node.id + "$))" );
-		keys = keys.filter( key => {
-			return re.test( key );
-		} );
-		if( keys.length === 0 ) return null;
-		return keys.map( key => {
-			return this.links[ key ];
-		} );
-	}
-
 	getNeighbours( node ){
-		let links = this.getLinksByNode( node );
-		if( !links ) return;
+		if( !node.links ) return;
 		let id = node.id;
-		return links.map( link => {
-			if( link.a === id ){
+		return node.links.map( link => {
+			if( link.node1.id === id ){
 				// Give b
-				return this.getNodeById( link.b );
+				return link.node2;
 			}
 			// Give a
-			return this.getNodeById( link.a );
+			return link.node1;
 		} );
 	}
 
@@ -154,10 +156,6 @@ class NavigationGraph {
 		return this.links.hasOwnProperty( key ) && key;
 	}
 
-}
-
-function generateLinkKeyFromId( a, b ){
-	return a + "," + b;
 }
 
 function generateLinkKeyFromNode( a, b ){

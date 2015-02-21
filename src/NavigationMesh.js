@@ -262,9 +262,8 @@ class NavigationMesh {
 
 		} );
 
-
 		// Graph
-		this._graph = new NavigationGraph( nodes, links );
+		this._graph = new NavigationGraph( this, nodes, links );
 
 		// Clean up
 		previousNodes = null;
