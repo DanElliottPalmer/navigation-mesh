@@ -1,15 +1,5 @@
 class NavigationGraph {
 
-	addNode( node ){
-		this.nodes.push( node );
-	}
-
-	addLink( a, b, cost ){
-		if( this.hasLink( a, b ) ) return;
-		let key = generateLinkKeyFromNode( a, b );
-		return ( this.links[ key ] = new NavigationEdge( a, b, cost ) );
-	}
-
 	calculatePath( startPoint, endPoint ){
 
 		// Check if startPoint and endPoint are in the graph
@@ -176,29 +166,6 @@ class NavigationGraph {
 		// Check if b -> a
 		key = generateLinkKeyFromNode( b, a );
 		return this.links.hasOwnProperty( key ) && key;
-	}
-
-	removeLink( a, b ){
-		let key = "";
-		if( ( key = this.hasLink( a, b ) ) === false ) return;
-		this.links[ key ] = null;
-		delete this.links[ key ];
-	}
-
-	removeNode( node ){
-		
-		let links = this.getLinksByNode( node );
-		if( links && links.length > 0 ) {
-			links.forEach( link => {
-				this.removeLink( this.getNodeById( link.a ), this.getNodeById( link.b ) );
-			} );
-			links = null;
-		}
-
-		let index = this.nodes.indexOf( node );
-		if( index === -1 ) return;
-		this.nodes.splice( index, 1 );
-		
 	}
 
 }
