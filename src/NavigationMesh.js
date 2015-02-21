@@ -212,6 +212,7 @@ class NavigationMesh {
 					nodes.push( previousNodes[ point ] );
 				}
 				node = previousNodes[ point ];
+				node.triangles.push( triangle );
 
 				// Links
 				switch( pointIndex ){
@@ -240,10 +241,14 @@ class NavigationMesh {
 			boundaries = dataStructure.boundaries[ triIndex ];
 			let len = links.length;
 			let i;
+			let pointA;
+			let pointB;
 			boundaries.forEach( boundary => {
 				i = len - 4; // Go back 3 + 1 which increments at the start of loop
 				while( ++i < len ){
-					if( isLink( links[i], boundary[0], boundary[1] ) ){
+					pointA = previousNodes[ points[ boundary[0] ] ];
+					pointB = previousNodes[ points[ boundary[1] ] ];
+					if( isLink( links[i], pointA, pointB ) ){
 						links[i].boundary = true;
 						return;
 					}
@@ -261,8 +266,8 @@ class NavigationMesh {
 		node = null;
 
 		function isLink( link, a, b ){
-			return ( link.a === a && link.b === b ) ||
-						 ( link.a === b && link.b === a );
+			return ( link.node1 === a && link.node2 === b ) ||
+						 ( link.node1 === b && link.node2 === a );
 		}
 
 		function getDistance( a, b ){
