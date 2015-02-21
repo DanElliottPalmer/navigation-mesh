@@ -19,7 +19,7 @@ class NavigationGraph {
 		if( endNode === undefined ) return false;
 
 		// Check if startPoint and endPoint are in same polygon
-		if( startNode._NODEID === endNode._NODEID ){
+		if( startNode.id === endNode.id ){
 			return [ startPoint, startNode, endPoint ];
 		}
 
@@ -134,7 +134,7 @@ class NavigationGraph {
 	getLinksByNode( node ){
 		let keys = Object.keys( this.links );
 		if( keys.length === 0 ) return;
-		let re = new RegExp( "((^" + node._NODEID + ",)|(," + node._NODEID + "$))" );
+		let re = new RegExp( "((^" + node.id + ",)|(," + node.id + "$))" );
 		keys = keys.filter( key => {
 			return re.test( key );
 		} );
@@ -147,7 +147,7 @@ class NavigationGraph {
 	getNeighbours( node ){
 		let links = this.getLinksByNode( node );
 		if( !links ) return;
-		let id = node._NODEID;
+		let id = node.id;
 		return links.map( link => {
 			if( link.a === id ){
 				// Give b
@@ -161,7 +161,7 @@ class NavigationGraph {
 	getNodeById( id ){
 		let length = this.nodes.length;
 		while( length-- ){
-			if( this.nodes[ length ]._NODEID === id ){
+			if( this.nodes[ length ].id === id ){
 				return this.nodes[ length ];
 			}
 		}
@@ -208,5 +208,5 @@ function generateLinkKeyFromId( a, b ){
 }
 
 function generateLinkKeyFromNode( a, b ){
-	return a._NODEID + "," + b._NODEID;
+	return a.id + "," + b.id;
 }

@@ -2,7 +2,7 @@ let NavigationNodeID = 0;
 class NavigationNode {
 
 	constructor( x, y, triangle ){
-		this._NODEID = NavigationNodeID++;
+		this.id = NavigationNodeID++;
 		this.triangle = triangle;
 		this.x = x >>> 0;
 		this.y = y >>> 0;
