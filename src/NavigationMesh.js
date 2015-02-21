@@ -193,7 +193,7 @@ class NavigationMesh {
 		} );
 
 		let nodes = [];
-		let links = [];
+		let links = {};
 
 		let node;
 		let othernode;
@@ -224,13 +224,17 @@ class NavigationMesh {
 					// before would do too
 					case 2:
 						othernode = previousNodes[ triangle.points[0] ];
-						link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
-						links.push( link );
+						if( !hasLink( node, othernode ) ){
+							link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
+							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
+						}
 
 					case 1:
 						othernode = previousNodes[ triangle.points[ pointIndex - 1 ] ];
-						link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
-						links.push( link );
+						if( !hasLink( node, othernode ) ){
+							link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
+							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
+						}
 						break;
 
 				}
@@ -239,21 +243,21 @@ class NavigationMesh {
 
 			// Boundaries
 			boundaries = dataStructure.boundaries[ triIndex ];
-			let len = links.length;
+			let len = Object.keys( links ).length;
 			let i;
 			let pointA;
 			let pointB;
+			let linkKey;
 			boundaries.forEach( boundary => {
-				i = len - 4; // Go back 3 + 1 which increments at the start of loop
+				i = len - 4;	// Go back 3 + 1 which increments at the start of loop
 				while( ++i < len ){
 					pointA = previousNodes[ points[ boundary[0] ] ];
 					pointB = previousNodes[ points[ boundary[1] ] ];
-					if( isLink( links[i], pointA, pointB ) ){
-						links[i].boundary = true;
-						return;
+					if( ( linkKey = hasLink( pointA, pointB ) ) !== false ){
+						links[ linkKey ].boundary = true;
 					}
 				}
-			} );
+			});
 
 		} );
 
@@ -264,6 +268,14 @@ class NavigationMesh {
 		// Clean up
 		previousNodes = null;
 		node = null;
+
+		function hasLink( a, b ){
+			let key = generateLinkKeyFromNode( a, b );
+			if( links.hasOwnProperty( key ) ) return key;
+			key = generateLinkKeyFromNode( b, a );
+			if( links.hasOwnProperty( key ) ) return key;
+			return false;
+		}
 
 		function isLink( link, a, b ){
 			return ( link.node1 === a && link.node2 === b ) ||
@@ -280,6 +292,10 @@ class NavigationMesh {
 		return this._triangles;	
 	}
 
+}
+
+function generateLinkKeyFromNode( a, b ){
+	return a.id + "," + b.id;
 }
 
 /**

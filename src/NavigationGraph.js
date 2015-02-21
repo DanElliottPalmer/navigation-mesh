@@ -88,22 +88,8 @@ class NavigationGraph {
 	}
 
 	constructor( nodes, links ){
-		this.links = {};
+		this.links = links || {};
 		this.nodes = nodes || [];
-
-		if( Array.isArray( links ) ){
-			let key = "";
-			links.forEach( link => {
-				key = generateLinkKeyFromId( link.a, link.b );
-				if( this.links.hasOwnProperty( key ) ) return;
-				key = generateLinkKeyFromId( link.b, link.a );
-				if( this.links.hasOwnProperty( key ) ) return;
-				this.links[ key ] = link;
-			} );
-		} else {
-			this.links = links || {};
-		}
-
 	}
 
 	getClosestNode( x, y ){
