@@ -213,6 +213,7 @@ class NavigationMesh {
 				}
 				node = previousNodes[ point ];
 				node.triangles.push( triangle );
+				triangle.points[ pointIndex ] = node;
 
 				// Links
 				switch( pointIndex ){
