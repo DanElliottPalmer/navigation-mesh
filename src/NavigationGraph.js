@@ -98,7 +98,6 @@ class NavigationGraph {
 		}
 
 		// Add on the startPoint and endPoint
-		// TODO: Maybe turn these points into nodes or turn all the nodes into points
 		path = walkPath( closedList, startPoint, endPoints[ endPointIndex ] );
 		path.push( endPoint );
 
