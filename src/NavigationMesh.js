@@ -293,20 +293,3 @@ class NavigationMesh {
 function generateLinkKeyFromNode( a, b ){
 	return a.id + "," + b.id;
 }
-
-/**
- * Taken from my polygon bit but I should really comment this and explain
- * why this works
- * Found these stackOverflows that might help with guidance:
- * http://stackoverflow.com/a/16725715
- * http://stackoverflow.com/a/565282
- */
-function lineIntersection( point1, point2, point3, point4 ){
-
-	function ccw(x, y, z) {
-		return (z.y-x.y) * (y.x-x.x) >= (y.y-x.y) * (z.x-x.x);
-	}
-
-	return ccw(point1, point3, point4) !== ccw(point2, point3, point4) &&
-			ccw(point1, point2, point3) !== ccw(point1, point2, point4);
-};
