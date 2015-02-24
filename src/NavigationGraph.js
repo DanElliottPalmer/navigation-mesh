@@ -7,7 +7,6 @@ class NavigationGraph {
 		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
 		 */
 		
-		// TODO: Look at maybe restructuring nodes -> links [Enhancement]
 		let path;
 		let nodeQueue = new PriorityQueue(function( a, b ){
 			// Lowest priority == shortest distance
@@ -25,7 +24,6 @@ class NavigationGraph {
 		let current = null;
 		let neighbours;
 		let new_cost;
-		let link;
 		let priority;
 
 		let link_cost = 0;
@@ -37,7 +35,6 @@ class NavigationGraph {
 
 		while( nodeQueue.length !== 0 ){
 			current = nodeQueue.pop();
-			// if( current === endPoint ) break;
 			if( ( endPointIndex = endPoints.indexOf( current ) ) !== -1 ) break;
 
 			isPoint = !( current instanceof NavigationNode );
@@ -51,10 +48,9 @@ class NavigationGraph {
 			}
 			
 			neighbours.forEach( next => {
-				// console.log("next", next);
 
 				if( isPoint ){
-					link_cost = getDistance( current, next );
+					link_cost = NavigationUtils.getDistance( current, next );
 				} else {
 					link_cost = this.links[ this.hasLink( current, next ) ].cost;
 				}
@@ -64,7 +60,7 @@ class NavigationGraph {
 				if( !cost_so_far.hasOwnProperty( next ) || new_cost < cost_so_far[ next ] ){
 
 					cost_so_far[ next ] = new_cost;
-					priority = new_cost + heuristic( endPoint, next );
+					priority = new_cost + NavigationUtils.heuristic( endPoint, next );
 					nodeQueue.push( next, priority );
 					came_from[ next ] = current;
 
@@ -82,10 +78,6 @@ class NavigationGraph {
 
 		return path;
 
-		function getDistance( a, b ){
-			return Math.sqrt( Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2) );
-		}
-
 		function get_path( came_from, startNode, endNode ){
 			var current = endNode;
 			var path = [ current ];
@@ -94,10 +86,6 @@ class NavigationGraph {
 				path.unshift( current );
 			}
 			return path;
-		}
-
-		function heuristic( a, b ){
-			return Math.abs( a.x - b.x ) + Math.abs( a.y - b.y );
 		}
 
 	}
