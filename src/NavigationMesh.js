@@ -7,12 +7,18 @@ class NavigationMesh {
 		let graph = this.graph;
 		let pathPoints = this.graph.calculatePath( startPoint, endPoint );
 
+		console.group("Path");
+		console.log( pathPoints.map( point => {
+			return point.toString();
+		}) );
+		console.groupEnd();
+
 		// Simplify
 		if( pathPoints.length === 2 ) return pathPoints;
 
 		let simplePath = [];
 
-		// The current point in the path we checking - a
+		// The current point in the path we checking
 		let currentPoint;
 		// The last point that tested successful
 		let lastPoint = null;
@@ -28,6 +34,7 @@ class NavigationMesh {
 		currentPoint = pathPoints.shift();
 		simplePath.push( currentPoint );
 
+
 		// Loop over all the points
 		let i = -1;
 		let len = pathPoints.length;
@@ -36,6 +43,7 @@ class NavigationMesh {
 			let nextPoint = pathPoints[ i ];
 			console.group( "New point", i, currentPoint.toString(), "->", nextPoint.toString() );
 
+
 			// If we're on the second point, it can reach so we can skip everything
 			if( lastPoint === null ){
 				console.log("Skipping point as second point");
@@ -43,6 +51,7 @@ class NavigationMesh {
 				console.groupEnd();
 				continue;
 			}
+
 
 			// Check if the nextPoint and currentPoint share the same triangle
 			console.log("Performing a triangle check");
@@ -88,7 +97,115 @@ class NavigationMesh {
 				}
 			}
 
+
+			// Different kind of triangle check. If this point and the previous
+			// point share a triangle with the other point closer without intersecting
+			// any boundaries... use it
+			// Example test: test-image1
+			// TODO: All of this shit will need tidying
+			if( lastPoint.hasOwnProperty("triangles") &&
+					nextPoint.hasOwnProperty("triangles") ){
+
+				let matchingTriangles = nextPoint.triangles.filter( triangle => {
+					return lastPoint.triangles.indexOf( triangle ) !== -1;
+				});
+				
+				let oddPoint;
+				let oddPointDistance;
+				let lastPointDistance = NavigationUtils.getDistance( currentPoint, lastPoint );
+				let newLastPoint = null;
+				matchingTriangles.forEach( triangle => {
+
+					oddPoint = triangle.points.filter( point => {
+						return ( point.x !== lastPoint.x && point.y !== lastPoint.y ) ||
+									 ( point.x !== nextPoint.x && point.y !== nextPoint.y )
+					})[0];
+
+					if( ( oddPointDistance = NavigationUtils.getDistance( currentPoint, oddPoint ) ) < lastPointDistance ){
+						if( !intersectionTest.call( this, currentPoint, oddPoint, links, linkKeys ) ){
+							console.log("smaller");
+							lastPointDistance = oddPointDistance;
+							newLastPoint = oddPoint;
+						}
+					}
+
+				});
+
+				if( newLastPoint !== null ){
+					simplePath.push( newLastPoint );
+					currentPoint = newLastPoint;
+					lastPoint = nextPoint;
+					console.groupEnd();
+					continue;
+				}
+
+			}
+			
+
+
 			console.log("Performing intersection check");
+			// let j = -1;
+			// let jLen = linkKeys.length;
+			// let link;
+			// let nodeA;
+			// let nodeB;
+
+			// let nodeLinks = ( nextPoint.links && nextPoint.links.slice(0) || [] );
+			// if( !(currentPoint instanceof NavigationPoint) ){
+			// 	nodeLinks = nodeLinks.concat( ( currentPoint.links || [] ) );
+			// }
+
+			// let nodeLinkIndex = -1;
+			// let intersectionInsideCount = 0;
+			// let intersectionOutsideCount = 0;
+			// while( ++j < jLen ){
+
+			// 	link = links[ linkKeys[ j ] ];
+			// 	nodeA = this.graph.getNodeById( link.a );
+			// 	nodeB = this.graph.getNodeById( link.b );
+
+			// 	if( ( nodeLinkIndex = nodeLinks.indexOf( link ) ) !== -1 ){
+			// 		console.log("Skipping link as attached to node", nodeA.toString(), nodeB.toString());
+			// 		nodeLinks.splice( nodeLinkIndex, 1 );
+			// 		continue;
+			// 	}			
+				
+				
+			// 	if( NavigationTriangle.intersection( currentPoint, nextPoint, nodeA, nodeB ) ){
+
+			// 		console.log( "Line intersection", nodeA.toString(), nodeB.toString() );
+
+			// 		if( link.boundary ){
+			// 			intersectionOutsideCount++;
+			// 		} else {
+			// 			intersectionInsideCount++;
+			// 		}
+					
+			// 	}
+
+			// }
+
+			// console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
+			// if( (intersectionInsideCount === 0 && intersectionOutsideCount === 0) ||
+					// ( intersectionOutsideCount > 0 ) ){
+			if( intersectionTest.call( this, currentPoint, nextPoint, links, linkKeys ) ){
+				simplePath.push( lastPoint );
+				currentPoint = lastPoint;
+			}
+
+			lastPoint = nextPoint;
+
+			console.groupEnd();
+
+		}
+
+		if( lastPoint !== null ){
+			simplePath.push( lastPoint );
+		}
+
+		return simplePath;
+
+		function intersectionTest( currentPoint, nextPoint, links, linkKeys ){
 			let j = -1;
 			let jLen = linkKeys.length;
 			let link;
@@ -131,23 +248,11 @@ class NavigationMesh {
 			}
 
 			console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
-			if( (intersectionInsideCount === 0 && intersectionOutsideCount === 0) ||
-					( intersectionOutsideCount > 0 ) ){
-				simplePath.push( lastPoint );
-				currentPoint = lastPoint;
-			}
 
-			lastPoint = nextPoint;
-
-			console.groupEnd();
+			return ( intersectionInsideCount === 0 && intersectionOutsideCount === 0 ) ||
+						 ( intersectionOutsideCount > 0 );
 
 		}
-
-		if( lastPoint !== null ){
-			simplePath.push( lastPoint );
-		}
-
-		return simplePath;
 
 	}
 
