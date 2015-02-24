@@ -226,14 +226,14 @@ class NavigationMesh {
 					case 2:
 						othernode = previousNodes[ triangle.points[0] ];
 						if( !hasLink( node, othernode ) ){
-							link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
+							link = new NavigationEdge( node, othernode, NavigationUtils.getDistance( node, othernode ) );
 							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
 						}
 
 					case 1:
 						othernode = previousNodes[ triangle.points[ pointIndex - 1 ] ];
 						if( !hasLink( node, othernode ) ){
-							link = new NavigationEdge( node, othernode, getDistance( node, othernode ) );
+							link = new NavigationEdge( node, othernode, NavigationUtils.getDistance( node, othernode ) );
 							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
 						}
 						break;
@@ -280,10 +280,6 @@ class NavigationMesh {
 		function isLink( link, a, b ){
 			return ( link.node1 === a && link.node2 === b ) ||
 						 ( link.node1 === b && link.node2 === a );
-		}
-
-		function getDistance( a, b ){
-			return Math.sqrt( Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2) );
 		}
 
 	}
