@@ -7,62 +7,89 @@ class NavigationGraph {
 		 * http://www.redblobgames.com/pathfinding/a-star/implementation.html
 		 */
 		
+		// Will store the final path
 		let path;
-		let nodeQueue = new PriorityQueue(function( a, b ){
+		// Priority queue used to determine which nodes to check
+		let openQueue = new PriorityQueue(function( a, b ){
 			// Lowest priority == shortest distance
 			return this.heap[ a ].priority > this.heap[ b ].priority;
 		});
-		// Add on the starting node
-		nodeQueue.push( startPoint, 0 );
-
+		// Store the priority of the current neighbour. Calculated from the new cost
+		// and the heurestic value
+		let priority;
+		// Array of points with one of them that will be a final node
 		let endPoints = this.mesh.triangles.filter( triangle => {
 			return triangle.containsPoint( endPoint );
 		})[0].points;
-
-		let came_from = {};
-		let cost_so_far = {};
+		// Keeps track of points we've visiting
+		let closedList = {};
+		// Keeps track of the cost of the points we've visited
+		let costHistory = {};
+		// The current point
 		let current = null;
+		// The neighbours of the current point
 		let neighbours;
-		let new_cost;
-		let priority;
-
-		let link_cost = 0;
+		// The totaled new cost
+		let newCost;
+		// The cost of the current link
+		let linkCost = 0;
+		// Stores if the current point is a startPoint or endPoint
 		let isPoint = false;
+		// Index for keeping track of what the last point was
 		let endPointIndex = -1;
 
-		came_from[ startPoint ] = null;
-		cost_so_far[ startPoint ] = 0;
+		// Add on the starting node
+		openQueue.push( startPoint, 0 );
 
-		while( nodeQueue.length !== 0 ){
-			current = nodeQueue.pop();
+		// Reset the closedList for the startpoint
+		closedList[ startPoint ] = null;
+		// And store is cost value
+		costHistory[ startPoint ] = 0;
+
+		// Keep looping till we've emptied our queue
+		while( openQueue.length !== 0 ){
+
+			current = openQueue.pop();
+
+			// If the current point is one of the points in the final triangle, we
+			// can early quit and keep track of the index
 			if( ( endPointIndex = endPoints.indexOf( current ) ) !== -1 ) break;
 
 			isPoint = !( current instanceof NavigationNode );
 
+			// If the current point is not a NavigationNode, we have to work out 
+			// which triangle the point sits in and use the points of the triangle
+			// as the neighbours
 			if( isPoint ){
 				neighbours = this.mesh.triangles.filter( triangle => {
 					return triangle.containsPoint( current );
 				})[0].points;
+
+			// Or else just use the typical getNeighbours method
 			} else {
 				neighbours = this.getNeighbours( current );	
 			}
 			
 			neighbours.forEach( next => {
 
+				// If the point is not a NavigationNode, we have to use calculated
+				// distance as there is not a link.
 				if( isPoint ){
-					link_cost = NavigationUtils.getDistance( current, next );
+					linkCost = NavigationUtils.getDistance( current, next );
 				} else {
-					link_cost = this.links[ this.hasLink( current, next ) ].cost;
+					linkCost = this.links[ this.hasLink( current, next ) ].cost;
 				}
 
-				new_cost = cost_so_far[ current ] + link_cost;
+				newCost = costHistory[ current ] + linkCost;
 
-				if( !cost_so_far.hasOwnProperty( next ) || new_cost < cost_so_far[ next ] ){
+				// Check if we haven't visited this point or if we have, that the new
+				// cost is less that previously
+				if( !costHistory.hasOwnProperty( next ) || newCost < costHistory[ next ] ){
 
-					cost_so_far[ next ] = new_cost;
-					priority = new_cost + NavigationUtils.heuristic( endPoint, next );
-					nodeQueue.push( next, priority );
-					came_from[ next ] = current;
+					costHistory[ next ] = newCost;
+					priority = newCost + NavigationUtils.heuristic( endPoint, next );
+					openQueue.push( next, priority );
+					closedList[ next ] = current;
 
 				}
 
@@ -72,17 +99,16 @@ class NavigationGraph {
 
 		// Add on the startPoint and endPoint
 		// TODO: Maybe turn these points into nodes or turn all the nodes into points
-		let path = get_path( came_from, startPoint, endPoints[ endPointIndex ] );
-		// path.unshift( startPoint );
+		path = walkPath( closedList, startPoint, endPoints[ endPointIndex ] );
 		path.push( endPoint );
 
 		return path;
 
-		function get_path( came_from, startNode, endNode ){
+		function walkPath( closedList, startNode, endNode ){
 			var current = endNode;
 			var path = [ current ];
 			while( current !== startNode ){
-				current = came_from[ current ];
+				current = closedList[ current ];
 				path.unshift( current );
 			}
 			return path;
