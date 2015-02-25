@@ -122,7 +122,8 @@ class NavigationMesh {
 					})[0];
 
 					if( ( oddPointDistance = NavigationUtils.getDistance( currentPoint, oddPoint ) ) < lastPointDistance ){
-						if( !intersectionTest.call( this, currentPoint, oddPoint, links, linkKeys ) ){
+						let intersection = intersectionTest.call( this, currentPoint, oddPoint, links, linkKeys );
+						if( intersection.outside === 0 ){
 							console.log("smaller");
 							lastPointDistance = oddPointDistance;
 							newLastPoint = oddPoint;
@@ -188,7 +189,9 @@ class NavigationMesh {
 			// console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
 			// if( (intersectionInsideCount === 0 && intersectionOutsideCount === 0) ||
 					// ( intersectionOutsideCount > 0 ) ){
-			if( intersectionTest.call( this, currentPoint, nextPoint, links, linkKeys ) ){
+			let intersection = intersectionTest.call( this, currentPoint, nextPoint, links, linkKeys );
+			if( ( intersection.inside === 0 && intersection.outside === 0 ) ||
+				  ( intersection.outside > 0 ) ){
 				simplePath.push( lastPoint );
 				currentPoint = lastPoint;
 			}
@@ -248,6 +251,11 @@ class NavigationMesh {
 			}
 
 			console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
+
+			return {
+				"inside": intersectionInsideCount,
+				"outside": intersectionOutsideCount
+			};
 
 			return ( intersectionInsideCount === 0 && intersectionOutsideCount === 0 ) ||
 						 ( intersectionOutsideCount > 0 );
