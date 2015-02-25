@@ -226,8 +226,8 @@ class NavigationMesh {
 			while( ++j < jLen ){
 
 				link = links[ linkKeys[ j ] ];
-				nodeA = this.graph.getNodeById( link.a );
-				nodeB = this.graph.getNodeById( link.b );
+				nodeA = link.from;
+				nodeB = link.to;
 
 				if( ( nodeLinkIndex = nodeLinks.indexOf( link ) ) !== -1 ){
 					console.log("Skipping link as attached to node", nodeA.toString(), nodeB.toString());
@@ -389,8 +389,8 @@ class NavigationMesh {
 		}
 
 		function isLink( link, a, b ){
-			return ( link.node1 === a && link.node2 === b ) ||
-						 ( link.node1 === b && link.node2 === a );
+			return ( link.from === a && link.to === b ) ||
+						 ( link.from === b && link.to === a );
 		}
 
 	}

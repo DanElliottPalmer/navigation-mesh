@@ -138,25 +138,14 @@ class NavigationGraph {
 
 	getNeighbours( node ){
 		if( !node.links ) return;
-		let id = node.id;
 		return node.links.map( link => {
-			if( link.node1.id === id ){
+			if( link.from === node ){
 				// Give b
-				return link.node2;
+				return link.to;
 			}
 			// Give a
-			return link.node1;
+			return link.from;
 		} );
-	}
-
-	getNodeById( id ){
-		let length = this.nodes.length;
-		while( length-- ){
-			if( this.nodes[ length ].id === id ){
-				return this.nodes[ length ];
-			}
-		}
-		return;
 	}
 
 	hasLink( a, b ){
