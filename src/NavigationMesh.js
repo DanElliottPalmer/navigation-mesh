@@ -112,7 +112,7 @@ class NavigationMesh {
 				
 				let oddPoint;
 				let oddPointDistance;
-				let lastPointDistance = NavigationUtils.getDistance( currentPoint, lastPoint );
+				let lastPointDistance = NavigationUtils.distance( currentPoint, lastPoint );
 				let newLastPoint = null;
 				matchingTriangles.forEach( triangle => {
 
@@ -121,7 +121,7 @@ class NavigationMesh {
 									 ( point.x !== nextPoint.x && point.y !== nextPoint.y )
 					})[0];
 
-					if( ( oddPointDistance = NavigationUtils.getDistance( currentPoint, oddPoint ) ) < lastPointDistance ){
+					if( ( oddPointDistance = NavigationUtils.distance( currentPoint, oddPoint ) ) < lastPointDistance ){
 						let intersection = intersectionTest.call( this, currentPoint, oddPoint, links, linkKeys );
 						if( intersection.outside === 0 ){
 							console.log("smaller");
@@ -337,14 +337,14 @@ class NavigationMesh {
 					case 2:
 						othernode = previousNodes[ triangle.points[0] ];
 						if( !hasLink( node, othernode ) ){
-							link = new NavigationEdge( node, othernode, NavigationUtils.getDistance( node, othernode ) );
+							link = new NavigationEdge( node, othernode, NavigationUtils.distance( node, othernode ) );
 							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
 						}
 
 					case 1:
 						othernode = previousNodes[ triangle.points[ pointIndex - 1 ] ];
 						if( !hasLink( node, othernode ) ){
-							link = new NavigationEdge( node, othernode, NavigationUtils.getDistance( node, othernode ) );
+							link = new NavigationEdge( node, othernode, NavigationUtils.distance( node, othernode ) );
 							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
 						}
 						break;

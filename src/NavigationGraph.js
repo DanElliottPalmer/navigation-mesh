@@ -75,7 +75,7 @@ class NavigationGraph {
 				// If the point is not a NavigationNode, we have to use calculated
 				// distance as there is not a link.
 				if( isPoint ){
-					linkCost = NavigationUtils.getDistance( current, next );
+					linkCost = NavigationUtils.distance( current, next );
 				} else {
 					linkCost = this.links[ this.hasLink( current, next ) ].cost;
 				}
