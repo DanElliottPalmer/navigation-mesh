@@ -265,8 +265,6 @@ class NavigationMesh {
 	}
 
 	constructor(){
-		super();
-
 		this._graph = null;
 		this._triangles = [];
 	}
