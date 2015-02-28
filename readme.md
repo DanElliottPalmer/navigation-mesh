@@ -1,3 +1,6 @@
+#big note
+dont use this as im going to rewrite and stuff currently will/wont work
+
 #navigation mesh
 
 hi.
