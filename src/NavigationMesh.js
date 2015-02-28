@@ -6,6 +6,7 @@ class NavigationMesh {
 
 		let graph = this.graph;
 		let pathPoints = this.graph.calculatePath( startPoint, endPoint );
+		// return pathPoints;
 
 		console.group("Path");
 		console.log( pathPoints.map( point => {
@@ -28,6 +29,8 @@ class NavigationMesh {
 		let links = this.graph.links;
 		// Store all the keys of the links as we will probably loop over them a lot
 		let linkKeys = Object.keys( links );
+		// Allows us to quick and easy checks if we're on the last point
+		let isLastPoint = false;
 
 
 		// Set the currentPoint and store it
@@ -41,6 +44,7 @@ class NavigationMesh {
 		while( ++i < len ){
 
 			let nextPoint = pathPoints[ i ];
+			isLastPoint = i === len - 1;
 			console.group( "New point", i, currentPoint.toString(), "->", nextPoint.toString() );
 
 
@@ -53,11 +57,17 @@ class NavigationMesh {
 			}
 
 
+
+
+
+
+
+
 			// Check if the nextPoint and currentPoint share the same triangle
 			console.log("Performing a triangle check");
 			let triangles;
 			let testPoint = new NavigationPoint();
-			if( nextPoint instanceof NavigationPoint ){
+			if( isLastPoint ){
 				if( currentPoint instanceof NavigationPoint ){
 					triangles = this.triangles.filter( triangle => {
 						return triangle.containsPoint( new NavigationPoint( currentPoint.x, currentPoint.y ) );
@@ -81,9 +91,10 @@ class NavigationMesh {
 				console.groupEnd();
 				continue;
 			}
+			console.log("Failed first triangle check");
 
 			// Check if final point is a point as we can do triangle check
-			if( nextPoint instanceof NavigationPoint ){
+			if( isLastPoint ){
 				console.log("Performing a second triangle check");
 				triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
 				containsPoint = triangles.some( triangle => {
@@ -103,26 +114,57 @@ class NavigationMesh {
 			// any boundaries... use it
 			// Example test: test-image1
 			// TODO: All of this shit will need tidying
-			if( lastPoint.hasOwnProperty("triangles") &&
-					nextPoint.hasOwnProperty("triangles") ){
 
-				let matchingTriangles = nextPoint.triangles.filter( triangle => {
-					return lastPoint.triangles.indexOf( triangle ) !== -1;
-				});
+			// if( lastPoint.hasOwnProperty("triangles") &&
+					// nextPoint.hasOwnProperty("triangles") ){
+					
+				console.log("Strange triangle check");
+
+				let matchingTriangles = null;
+				if( isLastPoint ){
+					let lastPointTriangle = this.getTrianglesByPoint( nextPoint.x, nextPoint.y )[0];
+					let lastTriangles = new Set();
+					lastPointTriangle.points.forEach( point => {
+						this.getTrianglesByPoint( point.x, point.y ).forEach( triangle => {
+							lastTriangles.add( triangle );
+						});
+					});
+					matchingTriangles = [...lastTriangles].filter( triangle => {
+						return lastPoint.triangles.indexOf( triangle ) !== -1;
+					});
+				} else {
+					matchingTriangles = nextPoint.triangles.filter( triangle => {
+						return lastPoint.triangles.indexOf( triangle ) !== -1;
+					});
+				}
+
+				// let matchingTriangles = nextPoint.triangles.filter( triangle => {
+				// 	return lastPoint.triangles.indexOf( triangle ) !== -1;
+				// });
 				
 				let oddPoint;
 				let oddPointDistance;
-				let lastPointDistance = NavigationUtils.distance( currentPoint, lastPoint );
+				let lastPointDistance = 0;
 				let newLastPoint = null;
+
+				lastPointDistance = NavigationUtils.distance( currentPoint, lastPoint );
+				lastPointDistance += NavigationUtils.distance( lastPoint, nextPoint );
+
 				matchingTriangles.forEach( triangle => {
 
 					oddPoint = triangle.points.filter( point => {
 						return ( point.x !== lastPoint.x && point.y !== lastPoint.y ) ||
 									 ( point.x !== nextPoint.x && point.y !== nextPoint.y )
 					})[0];
+					console.log( oddPoint.toString() );
 
-					if( ( oddPointDistance = NavigationUtils.distance( currentPoint, oddPoint ) ) < lastPointDistance ){
+					oddPointDistance = NavigationUtils.distance( currentPoint, oddPoint );
+					oddPointDistance += NavigationUtils.distance( oddPoint, nextPoint );
+
+					console.log("Last distance", lastPointDistance, "Odd point distance", oddPointDistance);
+					if( oddPointDistance < lastPointDistance ){
 						let intersection = intersectionTest.call( this, currentPoint, oddPoint, links, linkKeys );
+						console.log( intersection );
 						if( intersection.outside === 0 ){
 							console.log("smaller");
 							lastPointDistance = oddPointDistance;
@@ -139,8 +181,8 @@ class NavigationMesh {
 					console.groupEnd();
 					continue;
 				}
-
-			}
+			console.log("Fail strange triangle check");
+			// }
 			
 
 
@@ -257,8 +299,8 @@ class NavigationMesh {
 				"outside": intersectionOutsideCount
 			};
 
-			return ( intersectionInsideCount === 0 && intersectionOutsideCount === 0 ) ||
-						 ( intersectionOutsideCount > 0 );
+			// return ( intersectionInsideCount === 0 && intersectionOutsideCount === 0 ) ||
+						 // ( intersectionOutsideCount > 0 );
 
 		}
 
@@ -270,10 +312,13 @@ class NavigationMesh {
 	}
 
 	getTrianglesByPoint( x, y ){
+		let pointTest = false;
 		return this.triangles.filter( triangle => {
-			return triangle.points.some( point => {
+			pointTest = triangle.points.some( point => {
 				return point.x === x && point.y === y;
 			} );
+			if( pointTest ) return true;
+			return triangle.containsPoint( new NavigationPoint( x, y ) );
 		} );
 	}
 

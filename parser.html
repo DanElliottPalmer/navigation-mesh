@@ -54,8 +54,14 @@
 
 			var mesh = null;
 			var path = null;
-			var startPoint = null;
-			var endPoint = null;
+			var startPoint = new NavigationPoint( 444,334 );
+			var endPoint = new NavigationPoint( 157,212 );
+			// var startPoint = new NavigationPoint( 397,313 );
+			// var endPoint = new NavigationPoint( 631,335 );
+			// var startPoint = new NavigationPoint( 501, 252 );
+			// var endPoint = new NavigationPoint( 549, 257 );
+			// var startPoint = new NavigationPoint( 630, 326 );
+			// var endPoint = new NavigationPoint( 397, 298 );
 
 			document.getElementById("chkRenderGraph").addEventListener("change", function onRenderGraphChange(){
 				isRenderGraph = this.checked;
@@ -72,15 +78,17 @@
 				}
 				if( isGraphParsed ){
 					randomPointTest();
-					tmrRandomPoints = setInterval( randomPointTest, 5000 );
+					tmrRandomPoints = setInterval( randomPointTest, 1000 );
 				}
 			});
 
-			document.getElementById("btnParse").addEventListener("click", function(){
+			document.getElementById("btnParse").addEventListener("click", parseGraph );
+			function parseGraph(){
 				mesh = new NavigationMesh();
 				mesh.parse( JSON.parse( document.getElementById("txtInput").value ) );
 				isGraphParsed = true;
-			});
+			}
+			parseGraph();
 
 			document.getElementById("btnStart").addEventListener("click", function(){
 				if( testRandomPoints ){
@@ -199,6 +207,16 @@
 			var ctx = domCanvas.getContext("2d");
 			var width = domCanvas.width;
 			var height = domCanvas.height;
+			var mouseX = 0;
+			var mouseY = 0;
+
+			domCanvas.addEventListener("mousemove", function( e ){
+				// console.log(e);
+				// mouseX = e.offsetX - this.offsetLeft;
+				// mouseY = e.offsetY - this.offsetTop;
+				mouseX = e.x - this.offsetLeft;
+				mouseY = e.y - this.offsetTop;
+			});
 
 			function clear(){
 				ctx.clearRect( 0, 0, width, height );
@@ -210,6 +228,7 @@
 				renderTriangles();
 				renderGraph();
 				renderPath();
+				renderMouseCoords();
 			}
 
 			function renderGraph(){
@@ -224,6 +243,16 @@
 					ctx.closePath();
 					ctx.fill();
 				});
+				ctx.restore();
+			}
+
+			function renderMouseCoords(){
+				ctx.save();
+				ctx.fillStyle = "#fff";
+				ctx.fillRect(0, 0, 50, 20 );
+				ctx.fillStyle = "#000";
+				ctx.font = "10px Arial";
+				ctx.fillText( mouseX + "," + mouseY, 10, 10 );
 				ctx.restore();
 			}
 
