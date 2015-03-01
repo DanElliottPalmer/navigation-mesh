@@ -7,7 +7,7 @@ class NavigationMesh {
 		this.triangles = null;
 	}
 
-	findPath( start, end ){
+	findGraphPath( start, end ){
 
 		// Start node that we will add into the graph network
 		let startNode = null;
@@ -118,13 +118,8 @@ class NavigationMesh {
 		}
 
 		path = walkClosedList( closedList, startNode, endNode );
-		
-		/**
-		 * Convert all the points to arrays
-		 */
-		path = path.map( point => {
-			return [ point.point.x, point.point.y ];
-		});
+		path[0] = new NavigationPoint( start[0], start[1] );
+		path[ path.length - 1 ] = new NavigationPoint( end[0], end[1] );
 
 		/**
 		 * Cleanup bits
@@ -316,6 +311,156 @@ class NavigationMesh {
 			}
 			return false;
 		}
+
+	}
+
+	path( start, end ){
+		let path = this.findGraphPath( start, end );
+		path = this.simplify( path );
+		path = path.map( point => {
+			if( point instanceof NavigationPoint ) return [ point.x, point.y ];
+			return [ point.point.x, point.point.y ];
+		});
+		return path;
+	}
+
+	simplify( path ){
+
+		if( path.length === 2 ) return path;
+
+		// Copy the path as we're going to be manipulating it
+		let pathCopy = path.slice( 0 );
+		// We store simplified path
+		let simplePath = []
+		// The current point we are starting from
+		let currentPoint = null;
+		// The next point we are going to
+		let nextPoint = null;
+		// The last point that succeeded to be reached
+		let lastPoint = null;
+		// All the walls of the mesh
+		let allEdges = [...this.edges].map( value => { return value[1]; });
+
+		/**
+		 * Add the first point to the path
+		 */
+		currentPoint = pathCopy.shift();
+		simplePath.push( currentPoint );
+
+		let i = -1;
+		let pathLength = pathCopy.length;
+		while( ++i < pathLength ){
+
+			// Store the next point
+			nextPoint = pathCopy[ i ];
+			console.group( "New point", i, currentPoint.toString() + "->" + nextPoint.toString() );
+
+			/**
+			 * First check
+			 * If the lastPoint is null, we can update it and skip all the caffuffle
+			 */
+			if( lastPoint === null ){
+				console.log( "Skipping point as lastPoint is null" );
+				lastPoint = nextPoint;
+				console.groupEnd();
+				continue;
+			}
+
+			/**
+			 * Secondly, can we just draw a straight line and solve all problems?
+			 */
+			console.groupCollapsed( "Intersection test" );
+			// Test all the edges left but skip ones that are connected to the
+			// current point or next point
+			let totalInsideIntersection = 0;
+			let totalOutsideIntersection = 0;
+			let lineStart = currentPoint.point || currentPoint;
+			let lineEnd = nextPoint.point || nextPoint;
+			allEdges.forEach( edge => {
+				if( edge.from === currentPoint || edge.from === nextPoint ) return;
+				if( edge.to === currentPoint || edge.to === nextPoint ) return;
+				console.log("Testing edge", edge.toString());
+				if( NavigationUtils.lineIntersection( lineStart, lineEnd, edge.from.point, edge.to.point ) ){
+					if( edge.boundary ){
+						totalOutsideIntersection++;
+					} else {
+						totalInsideIntersection++;
+					}
+				}
+			});
+			console.groupEnd();
+			console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
+			if( totalInsideIntersection > 0 && totalOutsideIntersection === 0 ) {
+				console.log("Direct line so updated path");
+				lastPoint = nextPoint;
+				console.groupEnd();
+				continue;
+			}
+
+			/**
+			 * Another check to make journeys shorter
+			 * Get triangles that both the last point and next point share and check
+			 * to see if the spare points are closed than the last
+			 */
+			if( nextPoint !== pathCopy[ pathCopy.length - 1 ] ){
+				console.log("Closer spare nodes test");
+				let spareTriangles = new Set();
+				let sparePoints = [];
+				let currentDistance = NavigationUtils.distance( currentPoint.point || currentPoint, lastPoint.point );
+				currentDistance += NavigationUtils.distance( lastPoint.point, nextPoint.point );
+				let spareDistance = 0;
+				lastPoint.triangles.forEach( triangle => { spareTriangles.add( triangle ) });
+				nextPoint.triangles.forEach( triangle => { spareTriangles.add( triangle ) });
+				spareTriangles.forEach( triangle => {
+					sparePoints.push( triangle.points.filter( point => {
+						return point !== lastPoint.point && point !== nextPoint.point;
+					})[0] );
+				});
+				sparePoints.forEach( point => {
+					spareDistance = NavigationUtils.distance( currentPoint.point || currentPoint, point );
+					spareDistance += NavigationUtils.distance( point, nextPoint.point );
+					if( spareDistance < currentDistance ){
+						console.groupCollapsed("Shorter distance so intersection check");
+						totalInsideIntersection = 0;
+						totalOutsideIntersection = 0;
+						lineStart = currentPoint.point || currentPoint;
+						lineEnd = point;
+						allEdges.forEach( edge => {
+							if( edge.from.point === lineStart || edge.from.point === lineEnd ) return;
+							if( edge.to.point === lineStart || edge.to.point === lineEnd ) return;
+							console.log("Testing edge", edge.toString());
+							if( NavigationUtils.lineIntersection( lineStart, lineEnd, edge.from.point, edge.to.point ) ){
+								if( edge.boundary ){
+									totalOutsideIntersection++;
+								} else {
+									totalInsideIntersection++;
+								}
+							}
+						});
+						console.groupEnd();
+						console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
+						if( totalInsideIntersection > 0 && totalOutsideIntersection === 0 ) {
+							currentDistance = spareDistance;
+							lastPoint = this.nodes.get( point.toString() );
+						}
+					}
+				});
+			}
+
+			/**
+			 * Failed at everything so update the line
+			 */
+			simplePath.push( lastPoint );
+			currentPoint = lastPoint;
+			lastPoint = nextPoint;
+
+			console.groupEnd();
+
+		}
+
+		simplePath.push( lastPoint );
+
+		return simplePath;
 
 	}
 

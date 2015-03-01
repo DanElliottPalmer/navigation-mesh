@@ -54,14 +54,16 @@
 
 			var mesh = null;
 			var path = null;
-			var startPoint = new NavigationPoint( 444,334 );
-			var endPoint = new NavigationPoint( 157,212 );
+			// var startPoint = new NavigationPoint( 444,334 );
+			// var endPoint = new NavigationPoint( 157,212 );
 			// var startPoint = new NavigationPoint( 397,313 );
 			// var endPoint = new NavigationPoint( 631,335 );
 			// var startPoint = new NavigationPoint( 501, 252 );
 			// var endPoint = new NavigationPoint( 549, 257 );
-			// var startPoint = new NavigationPoint( 630, 326 );
-			// var endPoint = new NavigationPoint( 397, 298 );
+			var startPoint = new NavigationPoint( 630, 326 );
+			var endPoint = new NavigationPoint( 397, 298 );
+			// var startPoint = new NavigationPoint( 527, 95 );
+			// var endPoint = new NavigationPoint( 480, 328 );
 
 			document.getElementById("chkRenderGraph").addEventListener("change", function onRenderGraphChange(){
 				isRenderGraph = this.checked;
@@ -113,7 +115,7 @@
 					return;
 				}
 				console.clear();
-				path = mesh.findPath( [ startPoint.x, startPoint.y ], [ endPoint.x, endPoint.y ] );
+				path = mesh.path( [ startPoint.x, startPoint.y ], [ endPoint.x, endPoint.y ] );
 			});
 
 			document.getElementById("domCanvas").addEventListener("click", function( e ){
@@ -162,7 +164,7 @@
 				);
 
 				console.clear();
-				path = mesh.findPath( startPoint , endPoint );
+				path = mesh.path( startPoint , endPoint );
 			}
 
 			function random( min, max ){
