@@ -71,12 +71,12 @@ class NavigationMesh {
 				/**
 				 * Check to see if the node exists. If it doesn't, we need to create it
 				 */
-				if( !this.nodes.has( trianglePoint ) ){
+				if( !this.nodes.has( trianglePoint.toString() ) ){
 					currentNode = new NavigationNode();
 					currentNode.point = trianglePoint;
-					this.nodes.set( trianglePoint, currentNode );
+					this.nodes.set( trianglePoint.toString(), currentNode );
 				} else {
-					currentNode = this.nodes.get( trianglePoint );
+					currentNode = this.nodes.get( trianglePoint.toString() );
 				}
 				currentNode.triangles.add( triangle );
 
@@ -94,7 +94,7 @@ class NavigationMesh {
 						return;
 
 					case 2:
-						otherNode = this.nodes.get( triangle.points[0] );
+						otherNode = this.nodes.get( triangle.points[0].toString() );
 						if( !this.getEdgeContaining( currentNode, otherNode ) ){
 							currentEdge = new NavigationEdge( currentNode, otherNode );
 							/**
@@ -109,7 +109,7 @@ class NavigationMesh {
 						}
 
 					case 1:
-						otherNode = this.nodes.get( triangle.points[ trianglePointIndex - 1 ] );
+						otherNode = this.nodes.get( triangle.points[ trianglePointIndex - 1 ].toString() );
 						if( !this.getEdgeContaining( currentNode, otherNode ) ){
 							currentEdge = new NavigationEdge( currentNode, otherNode );
 							/**
