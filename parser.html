@@ -54,8 +54,8 @@
 
 			var mesh = null;
 			var path = null;
-			// var startPoint = new NavigationPoint( 444,334 );
-			// var endPoint = new NavigationPoint( 157,212 );
+			var startPoint = new NavigationPoint( 444,334 );
+			var endPoint = new NavigationPoint( 157,212 );
 			// var startPoint = new NavigationPoint( 397,313 );
 			// var endPoint = new NavigationPoint( 631,335 );
 			// var startPoint = new NavigationPoint( 501, 252 );
@@ -113,7 +113,7 @@
 					return;
 				}
 				console.clear();
-				path = mesh.calculatePath( startPoint, endPoint );
+				path = mesh.findPath( [ startPoint.x, startPoint.y ], [ endPoint.x, endPoint.y ] );
 			});
 
 			document.getElementById("domCanvas").addEventListener("click", function( e ){
@@ -162,7 +162,7 @@
 				);
 
 				console.clear();
-				path = mesh.calculatePath( new NavigationPoint( startPoint[0], startPoint[1] ), new NavigationPoint( endPoint[0], endPoint[1] ) );
+				path = mesh.findPath( startPoint , endPoint );
 			}
 
 			function random( min, max ){
@@ -227,7 +227,7 @@
 				clear();
 				renderTriangles();
 				renderGraph();
-				// renderPath();
+				renderPath();
 				renderMouseCoords();
 			}
 
@@ -272,15 +272,15 @@
 			function renderPath(){
 				if( path === null ) return;
 				ctx.save();
-				ctx.strokeStyle = "#00f";
+				ctx.strokeStyle = "#f0f";
 				ctx.lineWidth = 2;
 				ctx.beginPath();
 				path.forEach(function eachPathPoint( point, index ){
 					if( index === 0 ){
-						ctx.moveTo( point.x, point.y );
+						ctx.moveTo( point[0], point[1] );
 						return;
 					}
-					ctx.lineTo( point.x, point.y );
+					ctx.lineTo( point[0], point[1] );
 				});
 				ctx.stroke();
 				ctx.restore();

@@ -9,7 +9,171 @@ class NavigationMesh {
 
 	findPath( start, end ){
 
-		console.log( "Finding path", start, end );
+		// Start node that we will add into the graph network
+		let startNode = null;
+		// End node that we will add into the graph network
+		let endNode = null;
+		// Will store the path
+		let path;
+		// Priority queue to determine which nodes to check
+		let openQueue = new PriorityQueue(function( a, b ){
+			// Lowest priority == shortest distance
+			return this.heap[ a ].priority > this.heap[ b ].priority;
+		});
+		// Stores the priority of the current neighbour. Calculated from the new
+		// cost and the heuristic value
+		let priority;
+		let startTrianglePoints = this.triangles.filter( triangle => {
+			return triangle.containsPoint( start[0], start[1] );
+		})[0].points;
+		// Array of points from the triangle that contains the end point
+		let endTrianglePoints = this.triangles.filter( triangle => {
+			return triangle.containsPoint( end[0], end[1] );
+		})[0].points;
+		// Keeps track of points we've visited
+		let closedList = new Map();
+		// Keeps track of the cost of the points we've visited
+		let costHistory = new Map();
+		// The current node
+		let currentNode = null;
+		// The next node
+		let nextNode = null;
+		// The totaled new cost
+		let newCost = 0;
+
+
+		/**
+		 * Add the start point and edges into the graph
+		 */
+		startNode = new NavigationNode();
+		startNode.point = new NavigationPoint( start[0], start[1] );
+		this.nodes.set( startNode.toString(), startNode );
+		let startEdges = startTrianglePoints.map( point => {
+			let edge = new NavigationEdge( startNode, this.nodes.get( point.toString() ) );
+			this.edges.set( edge.toString(), edge );
+			edge.from.edges.add( edge );
+			edge.to.edges.add( edge );
+			return edge;
+		});		
+
+		/**
+		 * Do the same for the end point
+		 */
+		endNode = new NavigationNode();
+		endNode.point = new NavigationPoint( end[0], end[1] );
+		this.nodes.set( endNode.toString(), endNode );
+		let endEdges = endTrianglePoints.map( point => {
+			let edge = new NavigationEdge( endNode, this.nodes.get( point.toString() ) );
+			this.edges.set( edge.toString(), edge );
+			edge.from.edges.add( edge );
+			edge.to.edges.add( edge );
+			return edge;
+		});
+
+		/**
+		 * Clear startTrianglePoint and endTrianglePoints
+		 */
+		startTrianglePoints = null;
+		endTrianglePoints = null;
+
+		// Add the start point to the queue
+		openQueue.push( startNode, 0 );
+
+		// Reset the closedList and costHistory
+		closedList.set( startNode.toString(), null );
+		costHistory.set( startNode.toString(), 0 );
+
+		// Keep looping till we have emptied our queue
+		while( openQueue.length !== 0 ){
+			currentNode = openQueue.pop();
+
+			/**
+			 * If the current node is one of the points in the final triangle, we
+			 * can quit early as long as we keep track of the index
+			 */
+			if( currentNode === endNode ) break;
+
+			/**
+			 * Here we are either looping over NavigationEdges or an array of points
+			 * from the start triangle
+			 */
+			currentNode.edges.forEach( neighbour => {
+
+				newCost = costHistory.get( currentNode.toString() ) + neighbour.cost;
+				nextNode = otherNodeFromEdge( currentNode, neighbour );
+
+				/**
+				 * Check if we haven't already visited the point and add it. If we
+				 * have visited and the new cost is less, update the darn thing
+				 */
+				if( !costHistory.has( nextNode.toString() ) || newCost < costHistory.get( nextNode.toString() ) ){
+					costHistory.set( nextNode.toString(), newCost );
+					priority = newCost + NavigationUtils.heuristic( endNode.point, nextNode.point );
+					openQueue.push( nextNode, priority );
+					closedList.set( nextNode.toString(), currentNode );
+				}
+
+			});
+			
+		}
+
+		path = walkClosedList( closedList, startNode, endNode );
+		
+		/**
+		 * Convert all the points to arrays
+		 */
+		path = path.map( point => {
+			return [ point.point.x, point.point.y ];
+		});
+
+		/**
+		 * Cleanup bits
+		 * 1. Remove the startNode and it's edges
+		 * 2. Remove the endNode and it's edges
+		 */
+		startNode.edges.forEach( edge => {
+			let otherNode = otherNodeFromEdge( startNode, edge );
+			otherNode.edges.delete( edge );
+			startNode.edges.delete( edge );
+			this.edges.delete( edge.toString() );
+			edge.destroy();
+		});
+		this.nodes.delete( startNode.toString() );
+		startNode.destroy();
+		startNode = null;
+
+		endNode.edges.forEach( edge => {
+			let otherNode = otherNodeFromEdge( endNode, edge );
+			otherNode.edges.delete( edge );
+			endNode.edges.delete( edge );
+			this.edges.delete( edge.toString() );
+			edge.destroy();
+		});
+		this.nodes.delete( endNode.toString() );
+		endNode.destroy();
+		endNode = null;
+
+		/**
+		 * Serve up the path
+		 */
+		return path;
+
+
+
+		function otherNodeFromEdge( node, edge ){
+			if( edge.from === node ) return edge.to;
+			return edge.from;
+		}
+
+		function walkClosedList( closedList, startNode, endNode ){
+			let currentNode = endNode;
+			let path = [ currentNode ];
+			while( currentNode !== startNode ){
+				currentNode = closedList.get( currentNode.toString() );
+				path.unshift( currentNode );
+			}
+			return path;
+		}
 
 	}
 
@@ -38,8 +202,6 @@ class NavigationMesh {
 		/**
 		 * TODO: Look into using Float32Array for speeeeeeed
 		 */
-
-		console.log( "Parsing structure", structure );
 
 		/**
 		 * Create a copy of points we are going to use

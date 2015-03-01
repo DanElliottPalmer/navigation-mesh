@@ -7,6 +7,11 @@ class NavigationEdge {
 		this.to = to;
 	}
 
+	destroy(){
+		this.from = null;
+		this.to = null;
+	}
+
 	toString(){
 		return `(${this.from.toString()},${this.to.toString()})`;
 	}
