@@ -25,6 +25,14 @@ class NavigationMesh {
 		return false;
 	}
 
+	getNeighbours( node ){
+		if( node.edges.size === 0) return [];
+		return Array.from( node.edges ).map( edge => {
+			if( edge.from === node ) return edge.to;
+			return edge.from;
+		});
+	}
+
 	parse( structure ){
 
 		/**
