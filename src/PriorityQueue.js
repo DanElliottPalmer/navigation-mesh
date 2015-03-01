@@ -17,8 +17,11 @@ class PriorityQueue {
 	}
 
 	pop(){
+		if( this.length === 0 ) return;
 		let value = this.heap[ 1 ].value;
-		this.heap[ 1 ] = this.heap.pop();
+		let last = this.heap.pop();
+		if( this.length === 0 ) return value;		
+		this.heap[ 1 ] = last;
 		this.sink( 1 );
 		return value;
 	}
