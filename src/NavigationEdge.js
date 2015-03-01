@@ -1,37 +1,14 @@
 class NavigationEdge {
 
-	constructor( a, b, cost ){
-		this._cost = ( cost >>> 0 ) || 1;
+	constructor( from, to ){
 		this.boundary = false;
-		this.from = a;
-		this.to = b;
-
-		this.from.links.push( this );
-		this.to.links.push( this );
+		this.cost = NavigationUtils.distance( from.point, to.point );
+		this.from = from;
+		this.to = to;
 	}
 
-	get cost(){
-		return this._cost;
+	toString(){
+		return `(${this.from.toString()},${this.to.toString()})`;
 	}
 
-	destroy(){
-
-		removeLink( this.from, this );
-		removeLink( this.to, this );
-
-		this.from = null;
-		this.to = null;
-
-		function removeLink( node, link ){
-			let len = node.links.length;
-			while( len-- ){
-				if( node.links[ len ] === link ){
-					node.links.splice( len, 1 );
-					return;
-				}
-			}
-		}
-
-	}
-	
 }

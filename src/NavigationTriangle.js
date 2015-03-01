@@ -2,25 +2,25 @@ class NavigationTriangle {
 
 	get bounds(){
 		if( this._dirty ){
-			let length = this.points.length;
-			let point = null;
-			var minX = Number.MAX_VALUE;
-			var minY = Number.MAX_VALUE;
-			var maxX = Number.MIN_VALUE;
-			var maxY = Number.MIN_VALUE;
-			while( length-- ){
-				point = this.points[ length ];
-				if( minX > point.x ){
-					minX = point.x;
+			let pointsLength = this.points.length;
+			let currentPoint = null;
+			let minX = Number.MAX_VALUE;
+			let minY = Number.MAX_VALUE;
+			let maxX = Number.MIN_VALUE;
+			let maxY = Number.MIN_VALUE;
+			while( pointsLength-- ){
+				currentPoint = this.points[ pointsLength ];
+				if( minX > currentPoint.x ){
+					minX = currentPoint.x;
 				}
-				if( maxX < point.x ){
-					maxX = point.x;
+				if( maxX < currentPoint.x ){
+					maxX = currentPoint.x;
 				}
-				if( minY > point.y ){
-					minY = point.y;
+				if( minY > currentPoint.y ){
+					minY = currentPoint.y;
 				}
-				if( maxY < point.y ){
-					maxY = point.y;
+				if( maxY < currentPoint.y ){
+					maxY = currentPoint.y;
 				}
 			}
 			this._bounds.x = minX;
@@ -34,11 +34,11 @@ class NavigationTriangle {
 
 	constructor( points ){
 		this._bounds = {
-			"containsPoint": function( point ){
-				return ( point.y >= this.y &&
-						 point.y <= this.height + this.y &&
-						 point.x >= this.x &&
-						 point.x <= this.width + this.x );
+			"containsPoint": function( x, y ){
+				return ( y >= this.y &&
+						 y <= this.height + this.y &&
+						 x >= this.x &&
+						 x <= this.width + this.x );
 			},
 			"height": 0,
 			"width": 0,
@@ -49,39 +49,45 @@ class NavigationTriangle {
 		this._points = points;
 	}
 
-	containsPoint( point ){
+	containsPoint( x, y ){
 
-		if( !this.bounds.containsPoint( point ) ){
+		/**
+		 * Check the bounds of the triangle first as it means we can skip doing
+		 * HEEAAAAAVY math (kinda)
+		 */
+		if( !this.bounds.containsPoint( x, y ) ){
 			return false;
 		}
 
-		// Ray cast
-		let intersections = 0;
-		let len = this.points.length;
-		let x1 = this.bounds.x;
-		let x2 = x1 + this.bounds.width;
-		let epsilon = ( x2 - x1 )/100;
-		let point1 = new NavigationPoint( 0, 0 );
-		let point2 = new NavigationPoint( 0, 0 );
-		let point3 = new NavigationPoint( x1-epsilon, point.y );
-		let point4 = point.clone();
+		/**
+		 * Raycast
+		 */
+		let totalIntersections = 0;
+		let i = -1;
+		let pointsLength = this.points.length;
+		let epsilon = this.bounds.width / 100;
+		/**
+		 * Points we're going to reuse
+		 */
+		let point1 = new NavigationPoint();
+		let point2 = new NavigationPoint();
+		let point3 = new NavigationPoint( this.bounds.x - epsilon, y );
+		let point4 = new NavigationPoint( x, y );
 
-		var i = -1;
+		while( ++i < pointsLength ){
 
-		while( ++i < len ){
+			point1.x = this.points[ i ].x;
+			point1.y = this.points[ i ].y;
+			point2.x = this.points[ ( i + 1 ) % pointsLength ].x;
+			point2.y = this.points[ ( i + 1 ) % pointsLength ].y;
 
-			point1.x = this.points[i].x;
-			point1.y = this.points[i].y;
-
-			point2.x = this.points[ (i+1) % len ].x;
-			point2.y = this.points[ (i+1) % len ].y;
-
-			if( NavigationTriangle.intersection( point3, point4, point1, point2 ) ){
-				intersections++;
+			if( NavigationUtils.lineIntersection( point3, point4, point1, point2 ) ){
+				totalIntersections++;
 			}
 
 		}
-		return (intersections%2 !== 0);
+
+		return totalIntersections % 2 !== 0;
 
 	}
 
@@ -94,20 +100,3 @@ class NavigationTriangle {
 	}
 
 }
-
-NavigationTriangle.intersection = function( VecA, VecB, VecC, VecD ){
-	/**
-	 * VecA - Epsilon
-	 * VecB - Click point
-	 * VecC - Point1 Segment
-	 * VecD - Point2 Segment
-	 */
-
-	function ccw(x, y, z) {
-		return (z.y-x.y) * (y.x-x.x) >= (y.y-x.y) * (z.x-x.x);
-	}
-
-	return ccw(VecA, VecC, VecD) !== ccw(VecB, VecC, VecD) &&
-			ccw(VecA, VecB, VecC) !== ccw(VecA, VecB, VecD);
-
-};

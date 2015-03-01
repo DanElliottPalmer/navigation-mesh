@@ -54,8 +54,8 @@
 
 			var mesh = null;
 			var path = null;
-			var startPoint = new NavigationPoint( 444,334 );
-			var endPoint = new NavigationPoint( 157,212 );
+			// var startPoint = new NavigationPoint( 444,334 );
+			// var endPoint = new NavigationPoint( 157,212 );
 			// var startPoint = new NavigationPoint( 397,313 );
 			// var endPoint = new NavigationPoint( 631,335 );
 			// var startPoint = new NavigationPoint( 501, 252 );
@@ -227,7 +227,7 @@
 				clear();
 				renderTriangles();
 				renderGraph();
-				renderPath();
+				// renderPath();
 				renderMouseCoords();
 			}
 
@@ -236,12 +236,25 @@
 				ctx.save();
 				// Render nodes
 				ctx.fillStyle = "#0f0";
+				ctx.lineWidth = 3;
 				ctx.globalAlpha = 0.5;
-				mesh.graph.nodes.forEach(function eachNode( node ){
+				mesh.nodes.forEach(function eachNode( node ){
 					ctx.beginPath();
-					ctx.arc( node.x, node.y, 10, 0, Math.PI*2, false );
+					ctx.arc( node.point.x, node.point.y, 10, 0, Math.PI*2, false );
 					ctx.closePath();
 					ctx.fill();
+				});
+				mesh.edges.forEach(function eachEdge( edge ){
+					if( edge.boundary ){
+						ctx.strokeStyle = "#00f";
+					} else {
+						ctx.strokeStyle = "#0f0";
+					}
+					ctx.beginPath();
+					ctx.moveTo( edge.from.point.x, edge.from.point.y );
+					ctx.lineTo( edge.to.point.x, edge.to.point.y );
+					ctx.closePath();
+					ctx.stroke();
 				});
 				ctx.restore();
 			}

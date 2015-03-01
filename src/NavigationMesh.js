@@ -1,451 +1,152 @@
 class NavigationMesh {
 
-	calculatePath( startPoint, endPoint ){
-
-		if( this.graph === null ) return false;
-
-		let graph = this.graph;
-		let pathPoints = this.graph.calculatePath( startPoint, endPoint );
-		// return pathPoints;
-
-		console.group("Path");
-		console.log( pathPoints.map( point => {
-			return point.toString();
-		}) );
-		console.groupEnd();
-
-		// Simplify
-		if( pathPoints.length === 2 ) return pathPoints;
-
-		let simplePath = [];
-
-		// The current point in the path we checking
-		let currentPoint;
-		// The last point that tested successful
-		let lastPoint = null;
-		// The next point we're testing
-		let nextPoint;
-		// Store the links as we will use them a lot
-		let links = this.graph.links;
-		// Store all the keys of the links as we will probably loop over them a lot
-		let linkKeys = Object.keys( links );
-		// Allows us to quick and easy checks if we're on the last point
-		let isLastPoint = false;
-
-
-		// Set the currentPoint and store it
-		currentPoint = pathPoints.shift();
-		simplePath.push( currentPoint );
-
-
-		// Loop over all the points
-		let i = -1;
-		let len = pathPoints.length;
-		while( ++i < len ){
-
-			let nextPoint = pathPoints[ i ];
-			isLastPoint = i === len - 1;
-			console.group( "New point", i, currentPoint.toString(), "->", nextPoint.toString() );
-
-
-			// If we're on the second point, it can reach so we can skip everything
-			if( lastPoint === null ){
-				console.log("Skipping point as second point");
-				lastPoint = pathPoints[ i ];
-				console.groupEnd();
-				continue;
-			}
-
-
-
-
-
-
-
-
-			// Check if the nextPoint and currentPoint share the same triangle
-			console.log("Performing a triangle check");
-			let triangles;
-			let testPoint = new NavigationPoint();
-			if( isLastPoint ){
-				if( currentPoint instanceof NavigationPoint ){
-					triangles = this.triangles.filter( triangle => {
-						return triangle.containsPoint( new NavigationPoint( currentPoint.x, currentPoint.y ) );
-					});
-				} else {
-					triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
-				}
-				testPoint.x = nextPoint.x;
-				testPoint.y = nextPoint.y;
-			} else {
-				triangles = this.getTrianglesByPoint( nextPoint.x, nextPoint.y );
-				testPoint.x = currentPoint.x;
-				testPoint.y = currentPoint.y;
-			}
-			let containsPoint = triangles.some( triangle => {
-				return triangle.containsPoint( testPoint );
-			} );
-			if( containsPoint ){
-				console.log("Share a triangle");
-				lastPoint = nextPoint;
-				console.groupEnd();
-				continue;
-			}
-			console.log("Failed first triangle check");
-
-			// Check if final point is a point as we can do triangle check
-			if( isLastPoint ){
-				console.log("Performing a second triangle check");
-				triangles = this.getTrianglesByPoint( currentPoint.x, currentPoint.y );
-				containsPoint = triangles.some( triangle => {
-					return triangle.containsPoint( new NavigationPoint( nextPoint.x, nextPoint.y ) );
-				} );
-				if( containsPoint ){
-					console.log("Share a triangle");
-					lastPoint = nextPoint;
-					console.groupEnd();
-					continue;
-				}
-			}
-
-
-			// Different kind of triangle check. If this point and the previous
-			// point share a triangle with the other point closer without intersecting
-			// any boundaries... use it
-			// Example test: test-image1
-			// TODO: All of this shit will need tidying
-
-			// if( lastPoint.hasOwnProperty("triangles") &&
-					// nextPoint.hasOwnProperty("triangles") ){
-					
-				console.log("Strange triangle check");
-
-				let matchingTriangles = null;
-				if( isLastPoint ){
-					let lastPointTriangle = this.getTrianglesByPoint( nextPoint.x, nextPoint.y )[0];
-					let lastTriangles = new Set();
-					lastPointTriangle.points.forEach( point => {
-						this.getTrianglesByPoint( point.x, point.y ).forEach( triangle => {
-							lastTriangles.add( triangle );
-						});
-					});
-					matchingTriangles = [...lastTriangles].filter( triangle => {
-						return lastPoint.triangles.indexOf( triangle ) !== -1;
-					});
-				} else {
-					matchingTriangles = nextPoint.triangles.filter( triangle => {
-						return lastPoint.triangles.indexOf( triangle ) !== -1;
-					});
-				}
-
-				// let matchingTriangles = nextPoint.triangles.filter( triangle => {
-				// 	return lastPoint.triangles.indexOf( triangle ) !== -1;
-				// });
-				
-				let oddPoint;
-				let oddPointDistance;
-				let lastPointDistance = 0;
-				let newLastPoint = null;
-
-				lastPointDistance = NavigationUtils.distance( currentPoint, lastPoint );
-				lastPointDistance += NavigationUtils.distance( lastPoint, nextPoint );
-
-				matchingTriangles.forEach( triangle => {
-
-					oddPoint = triangle.points.filter( point => {
-						return ( point.x !== lastPoint.x && point.y !== lastPoint.y ) ||
-									 ( point.x !== nextPoint.x && point.y !== nextPoint.y )
-					})[0];
-					console.log( oddPoint.toString() );
-
-					oddPointDistance = NavigationUtils.distance( currentPoint, oddPoint );
-					oddPointDistance += NavigationUtils.distance( oddPoint, nextPoint );
-
-					console.log("Last distance", lastPointDistance, "Odd point distance", oddPointDistance);
-					if( oddPointDistance < lastPointDistance ){
-						let intersection = intersectionTest.call( this, currentPoint, oddPoint, links, linkKeys );
-						console.log( intersection );
-						if( intersection.outside === 0 ){
-							console.log("smaller");
-							lastPointDistance = oddPointDistance;
-							newLastPoint = oddPoint;
-						}
-					}
-
-				});
-
-				if( newLastPoint !== null ){
-					simplePath.push( newLastPoint );
-					currentPoint = newLastPoint;
-					lastPoint = nextPoint;
-					console.groupEnd();
-					continue;
-				}
-			console.log("Fail strange triangle check");
-			// }
-			
-
-
-			console.log("Performing intersection check");
-			// let j = -1;
-			// let jLen = linkKeys.length;
-			// let link;
-			// let nodeA;
-			// let nodeB;
-
-			// let nodeLinks = ( nextPoint.links && nextPoint.links.slice(0) || [] );
-			// if( !(currentPoint instanceof NavigationPoint) ){
-			// 	nodeLinks = nodeLinks.concat( ( currentPoint.links || [] ) );
-			// }
-
-			// let nodeLinkIndex = -1;
-			// let intersectionInsideCount = 0;
-			// let intersectionOutsideCount = 0;
-			// while( ++j < jLen ){
-
-			// 	link = links[ linkKeys[ j ] ];
-			// 	nodeA = this.graph.getNodeById( link.a );
-			// 	nodeB = this.graph.getNodeById( link.b );
-
-			// 	if( ( nodeLinkIndex = nodeLinks.indexOf( link ) ) !== -1 ){
-			// 		console.log("Skipping link as attached to node", nodeA.toString(), nodeB.toString());
-			// 		nodeLinks.splice( nodeLinkIndex, 1 );
-			// 		continue;
-			// 	}			
-				
-				
-			// 	if( NavigationTriangle.intersection( currentPoint, nextPoint, nodeA, nodeB ) ){
-
-			// 		console.log( "Line intersection", nodeA.toString(), nodeB.toString() );
-
-			// 		if( link.boundary ){
-			// 			intersectionOutsideCount++;
-			// 		} else {
-			// 			intersectionInsideCount++;
-			// 		}
-					
-			// 	}
-
-			// }
-
-			// console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
-			// if( (intersectionInsideCount === 0 && intersectionOutsideCount === 0) ||
-					// ( intersectionOutsideCount > 0 ) ){
-			let intersection = intersectionTest.call( this, currentPoint, nextPoint, links, linkKeys );
-			if( ( intersection.inside === 0 && intersection.outside === 0 ) ||
-				  ( intersection.outside > 0 ) ){
-				simplePath.push( lastPoint );
-				currentPoint = lastPoint;
-			}
-
-			lastPoint = nextPoint;
-
-			console.groupEnd();
-
-		}
-
-		if( lastPoint !== null ){
-			simplePath.push( lastPoint );
-		}
-
-		return simplePath;
-
-		function intersectionTest( currentPoint, nextPoint, links, linkKeys ){
-			let j = -1;
-			let jLen = linkKeys.length;
-			let link;
-			let nodeA;
-			let nodeB;
-
-			let nodeLinks = ( nextPoint.links && nextPoint.links.slice(0) || [] );
-			if( !(currentPoint instanceof NavigationPoint) ){
-				nodeLinks = nodeLinks.concat( ( currentPoint.links || [] ) );
-			}
-
-			let nodeLinkIndex = -1;
-			let intersectionInsideCount = 0;
-			let intersectionOutsideCount = 0;
-			while( ++j < jLen ){
-
-				link = links[ linkKeys[ j ] ];
-				nodeA = link.from;
-				nodeB = link.to;
-
-				if( ( nodeLinkIndex = nodeLinks.indexOf( link ) ) !== -1 ){
-					console.log("Skipping link as attached to node", nodeA.toString(), nodeB.toString());
-					nodeLinks.splice( nodeLinkIndex, 1 );
-					continue;
-				}			
-				
-				
-				if( NavigationTriangle.intersection( currentPoint, nextPoint, nodeA, nodeB ) ){
-
-					console.log( "Line intersection", nodeA.toString(), nodeB.toString() );
-
-					if( link.boundary ){
-						intersectionOutsideCount++;
-					} else {
-						intersectionInsideCount++;
-					}
-					
-				}
-
-			}
-
-			console.log( "Inside: "+intersectionInsideCount+" Outside: "+intersectionOutsideCount );
-
-			return {
-				"inside": intersectionInsideCount,
-				"outside": intersectionOutsideCount
-			};
-
-			// return ( intersectionInsideCount === 0 && intersectionOutsideCount === 0 ) ||
-						 // ( intersectionOutsideCount > 0 );
-
-		}
-
-	}
-
 	constructor(){
-		this._graph = null;
-		this._triangles = [];
+		this.edges = null;
+		this.nodes = null;
+		this.points = null;
+		this.triangles = null;
 	}
 
-	getTrianglesByPoint( x, y ){
-		let pointTest = false;
-		return this.triangles.filter( triangle => {
-			pointTest = triangle.points.some( point => {
-				return point.x === x && point.y === y;
-			} );
-			if( pointTest ) return true;
-			return triangle.containsPoint( new NavigationPoint( x, y ) );
-		} );
+	findPath( start, end ){
+
+		console.log( "Finding path", start, end );
+
 	}
 
-	get graph(){
-		return this._graph;
+	getEdgeContaining( node1, node2 ){
+		if( this.edges === null ) return false;
+		let key = "";
+		if( this.edges.has( ( key = node1 + "," + node2 ) ) ){
+			return this.edges.get( key );
+		}
+		if( this.edges.has( ( key = node2 + "," + node1 ) ) ){
+			return this.edges.get( key );
+		}
+		return false;
 	}
 
-	parse( dataStructure ){
-		console.log( dataStructure );
+	parse( structure ){
 
-		// Parse points
-		let points = dataStructure.points.map( point => {
+		/**
+		 * TODO: Look into using Float32Array for speeeeeeed
+		 */
+
+		console.log( "Parsing structure", structure );
+
+		/**
+		 * Create a copy of points we are going to use
+		 */
+		this.points = structure.points.map( point => {
 			return new NavigationPoint( point[0], point[1] );
-		} );
+		});
 
-		// Parse polygons
-		let poly = null;
-		this._triangles = dataStructure.triangles.map( triangle => {
-			poly = new NavigationTriangle( triangle.map( index => {
-				return points[ index ];
-			} ) );
-			/* DEBUG STUFF */
-			poly.fill = "none";
-			poly.strokeWidth = 1;
-			poly.stroke = "#f00";
-			/*     EOD     */
-			return poly;
-		} );
+		/**
+		 * Create a copy of the triangles with all the correct points
+		 */
+		this.triangles = structure.triangles.map( triangle => {
+			return new NavigationTriangle( triangle.map( pointIndex => {
+				return this.points[ pointIndex ];
+			}) );
+		});
 
-		let nodes = [];
-		let links = {};
+		/**
+		 * Create the graph network
+		 * Nodes & edges
+		 */
+		let currentNode = null;
+		let otherNode = null;
+		let currentEdge = null;
+		let currentBoundaries = null;
+		this.edges = new Map();
+		this.nodes = new Map();
+		this.triangles.forEach( ( triangle, triangleIndex ) => {
 
-		let node;
-		let othernode;
-		let link
-		let cost;
-		let boundaries;
+			/**
+			 * Create a copy of the current boundaries so we can remove them as we go
+			 */
+			currentBoundaries = structure.boundaries[ triangleIndex ].slice( 0 );
 
-		let previousNodes = {};
+			triangle.points.forEach( ( trianglePoint, trianglePointIndex ) => {
 
-		this._triangles.forEach( ( triangle, triIndex ) => {
-			triangle.points.forEach( ( point, pointIndex ) => {
-
-				// If node doesnt exist, create it
-				if( !previousNodes.hasOwnProperty( point ) ){
-					previousNodes[ point ] = new NavigationNode( point.x, point.y );
-					nodes.push( previousNodes[ point ] );
+				/**
+				 * Check to see if the node exists. If it doesn't, we need to create it
+				 */
+				if( !this.nodes.has( trianglePoint ) ){
+					currentNode = new NavigationNode();
+					currentNode.point = trianglePoint;
+					this.nodes.set( trianglePoint, currentNode );
+				} else {
+					currentNode = this.nodes.get( trianglePoint );
 				}
-				node = previousNodes[ point ];
-				node.triangles.push( triangle );
-				triangle.points[ pointIndex ] = node;
+				currentNode.triangles.add( triangle );
 
-				// Links
-				switch( pointIndex ){
-					// If we are the first point, there wont be anything to link to
+				/**
+				 * Create the edges between the nodes
+				 */
+				switch( trianglePointIndex ){
+
+					/**
+					 * If it is the first point in the triangle, it won't have anyone
+					 * to connect to as we haven't created the other points in this
+					 * triangle
+					 */
 					case 0:
 						return;
 
-					// If last point, we will let this fall through to do what the point
-					// before would do too
 					case 2:
-						othernode = previousNodes[ triangle.points[0] ];
-						if( !hasLink( node, othernode ) ){
-							link = new NavigationEdge( node, othernode, NavigationUtils.distance( node, othernode ) );
-							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
+						otherNode = this.nodes.get( triangle.points[0] );
+						if( !this.getEdgeContaining( currentNode, otherNode ) ){
+							currentEdge = new NavigationEdge( currentNode, otherNode );
+							/**
+							 * Also do a boundary check here to save us doing an extra loop
+							 */
+							if( isBoundary( currentBoundaries, this.points, currentNode.point, otherNode.point ) ){
+								currentEdge.boundary = true;
+							}
+							this.edges.set( currentEdge.toString(), currentEdge );
+							currentNode.edges.add( currentEdge );
+							otherNode.edges.add( currentEdge );
 						}
 
 					case 1:
-						othernode = previousNodes[ triangle.points[ pointIndex - 1 ] ];
-						if( !hasLink( node, othernode ) ){
-							link = new NavigationEdge( node, othernode, NavigationUtils.distance( node, othernode ) );
-							links[ generateLinkKeyFromNode( node, othernode ) ] = link;
+						otherNode = this.nodes.get( triangle.points[ trianglePointIndex - 1 ] );
+						if( !this.getEdgeContaining( currentNode, otherNode ) ){
+							currentEdge = new NavigationEdge( currentNode, otherNode );
+							/**
+							 * Also do a boundary check here to save us doing an extra loop
+							 */
+							if( isBoundary( currentBoundaries, this.points, currentNode.point, otherNode.point ) ){
+								currentEdge.boundary = true;
+							}
+							this.edges.set( currentEdge.toString(), currentEdge );
+							currentNode.edges.add( currentEdge );
+							otherNode.edges.add( currentEdge );
 						}
 						break;
 
 				}
 
-			} );
-
-			// Boundaries
-			boundaries = dataStructure.boundaries[ triIndex ];
-			let len = Object.keys( links ).length;
-			let i;
-			let pointA;
-			let pointB;
-			let linkKey;
-			boundaries.forEach( boundary => {
-				i = len - 4;	// Go back 3 + 1 which increments at the start of loop
-				while( ++i < len ){
-					pointA = previousNodes[ points[ boundary[0] ] ];
-					pointB = previousNodes[ points[ boundary[1] ] ];
-					if( ( linkKey = hasLink( pointA, pointB ) ) !== false ){
-						links[ linkKey ].boundary = true;
-					}
-				}
 			});
 
-		} );
+		});
 
-		// Graph
-		this._graph = new NavigationGraph( this, nodes, links );
-
-		// Clean up
-		previousNodes = null;
-		node = null;
-
-		function hasLink( a, b ){
-			let key = generateLinkKeyFromNode( a, b );
-			if( links.hasOwnProperty( key ) ) return key;
-			key = generateLinkKeyFromNode( b, a );
-			if( links.hasOwnProperty( key ) ) return key;
+		function isBoundary( boundaries, points, point1, point2 ){
+			if( boundaries.length === 0 ) return false;
+			let boundariesLength = boundaries.length;
+			let boundaryPoint1 = null;
+			let boundaryPoint2 = null;
+			while( boundariesLength-- ){
+				boundaryPoint1 = points[ boundaries[ boundariesLength ][0] ];
+				boundaryPoint2 = points[ boundaries[ boundariesLength ][1] ];
+				if( ( boundaryPoint1 === point1 && boundaryPoint2 === point2 ) ||
+						( boundaryPoint1 === point2 && boundaryPoint2 === point1 ) ){
+					boundaries.splice( boundariesLength, 1 );
+					return true;
+				}
+			}
 			return false;
 		}
 
-		function isLink( link, a, b ){
-			return ( link.from === a && link.to === b ) ||
-						 ( link.from === b && link.to === a );
-		}
-
 	}
 
-	get triangles(){
-		return this._triangles;	
-	}
-
-}
-
-function generateLinkKeyFromNode( a, b ){
-	return a.id + "," + b.id;
 }

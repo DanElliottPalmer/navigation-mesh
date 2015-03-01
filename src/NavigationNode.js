@@ -1,21 +1,13 @@
-let NavigationNodeID = 0;
 class NavigationNode {
 
-	constructor( x, y ){
-		this.id = NavigationNodeID++;
-		this.links = [];
-		this.triangles = [];
-		this.x = x >>> 0;
-		this.y = y >>> 0;
-	}
-
-	destroy(){
-		this.links = null;
-		this.triangles = null;
+	constructor(){
+		this.edges = new Set();
+		this.point = null;
+		this.triangles = new Set();
 	}
 
 	toString(){
-		return `(${this.x},${this.y})`;
+		return this.point.toString();
 	}
 
 }
