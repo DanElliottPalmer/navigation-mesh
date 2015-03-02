@@ -402,50 +402,50 @@ class NavigationMesh {
 			 * Get triangles that both the last point and next point share and check
 			 * to see if the spare points are closed than the last
 			 */
+			console.log("Closer spare nodes test");
+			let spareTriangles = new Set();
+			let sparePoints = [];
+			let currentDistance = NavigationUtils.distance( currentPoint.point || currentPoint, lastPoint.point );
+			currentDistance += NavigationUtils.distance( lastPoint.point, nextPoint.point || nextPoint );
+			let spareDistance = 0;
+			lastPoint.triangles.forEach( triangle => { spareTriangles.add( triangle ) });
 			if( nextPoint !== pathCopy[ pathCopy.length - 1 ] ){
-				console.log("Closer spare nodes test");
-				let spareTriangles = new Set();
-				let sparePoints = [];
-				let currentDistance = NavigationUtils.distance( currentPoint.point || currentPoint, lastPoint.point );
-				currentDistance += NavigationUtils.distance( lastPoint.point, nextPoint.point );
-				let spareDistance = 0;
-				lastPoint.triangles.forEach( triangle => { spareTriangles.add( triangle ) });
 				nextPoint.triangles.forEach( triangle => { spareTriangles.add( triangle ) });
-				spareTriangles.forEach( triangle => {
-					sparePoints.push( triangle.points.filter( point => {
-						return point !== lastPoint.point && point !== nextPoint.point;
-					})[0] );
-				});
-				sparePoints.forEach( point => {
-					spareDistance = NavigationUtils.distance( currentPoint.point || currentPoint, point );
-					spareDistance += NavigationUtils.distance( point, nextPoint.point );
-					if( spareDistance < currentDistance ){
-						console.groupCollapsed("Shorter distance so intersection check");
-						totalInsideIntersection = 0;
-						totalOutsideIntersection = 0;
-						lineStart = currentPoint.point || currentPoint;
-						lineEnd = point;
-						allEdges.forEach( edge => {
-							if( edge.from.point === lineStart || edge.from.point === lineEnd ) return;
-							if( edge.to.point === lineStart || edge.to.point === lineEnd ) return;
-							console.log("Testing edge", edge.toString());
-							if( NavigationUtils.lineIntersection( lineStart, lineEnd, edge.from.point, edge.to.point ) ){
-								if( edge.boundary ){
-									totalOutsideIntersection++;
-								} else {
-									totalInsideIntersection++;
-								}
-							}
-						});
-						console.groupEnd();
-						console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
-						if( totalInsideIntersection > 0 && totalOutsideIntersection === 0 ) {
-							currentDistance = spareDistance;
-							lastPoint = this.nodes.get( point.toString() );
-						}
-					}
-				});
 			}
+			spareTriangles.forEach( triangle => {
+				sparePoints.push( triangle.points.filter( point => {
+					return point !== lastPoint.point && (point !== (nextPoint.point || nextPoint));
+				})[0] );
+			});
+			sparePoints.forEach( point => {
+				spareDistance = NavigationUtils.distance( currentPoint.point || currentPoint, point );
+				spareDistance += NavigationUtils.distance( point, nextPoint.point || nextPoint );
+				if( spareDistance < currentDistance ){
+					console.groupCollapsed("Shorter distance so intersection check");
+					totalInsideIntersection = 0;
+					totalOutsideIntersection = 0;
+					lineStart = currentPoint.point || currentPoint;
+					lineEnd = point;
+					allEdges.forEach( edge => {
+						if( edge.from.point === lineStart || edge.from.point === lineEnd ) return;
+						if( edge.to.point === lineStart || edge.to.point === lineEnd ) return;
+						console.log("Testing edge", edge.toString());
+						if( NavigationUtils.lineIntersection( lineStart, lineEnd, edge.from.point, edge.to.point ) ){
+							if( edge.boundary ){
+								totalOutsideIntersection++;
+							} else {
+								totalInsideIntersection++;
+							}
+						}
+					});
+					console.groupEnd();
+					console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
+					if( totalInsideIntersection > 0 && totalOutsideIntersection === 0 ) {
+						currentDistance = spareDistance;
+						lastPoint = this.nodes.get( point.toString() );
+					}
+				}
+			});
 
 			/**
 			 * Failed at everything so update the line
