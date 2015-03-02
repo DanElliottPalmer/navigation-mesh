@@ -354,16 +354,16 @@ class NavigationMesh {
 
 			// Store the next point
 			nextPoint = pathCopy[ i ];
-			console.group( "New point", i, currentPoint.toString() + "->" + nextPoint.toString() );
+			// console.group( "New point", i, currentPoint.toString() + "->" + nextPoint.toString() );
 
 			/**
 			 * First check
 			 * If the lastPoint is null, we can update it and skip all the caffuffle
 			 */
 			if( lastPoint === null ){
-				console.log( "Skipping point as lastPoint is null" );
+				// console.log( "Skipping point as lastPoint is null" );
 				lastPoint = nextPoint;
-				console.groupEnd();
+				// console.groupEnd();
 				continue;
 			}
 
@@ -372,7 +372,7 @@ class NavigationMesh {
 			 * start and end points
 			 */
 			if( currentPoint === simplePath[0] && i === pathCopy.length - 1 ){
-				console.log("Testing if points share the same triangle");
+				// console.log("Testing if points share the same triangle");
 				let pointsInSameTriangle = false;
 				lastPoint.triangles.forEach( triangle => {
 					if( pointsInSameTriangle ) return;
@@ -380,9 +380,9 @@ class NavigationMesh {
 																 triangle.containsPoint( nextPoint.x, nextPoint.y );
 				});
 				if( pointsInSameTriangle ){
-					console.log("Points share the same triangle");
+					// console.log("Points share the same triangle");
 					lastPoint = nextPoint;
-					console.groupEnd();
+					// console.groupEnd();
 					continue;
 				}
 			}
@@ -391,7 +391,7 @@ class NavigationMesh {
 			/**
 			 * Can we just draw a straight line and solve all problems?
 			 */
-			console.groupCollapsed( "Intersection test" );
+			// console.groupCollapsed( "Intersection test" );
 			// Test all the edges left but skip ones that are connected to the
 			// current point or next point
 			let totalInsideIntersection = 0;
@@ -401,7 +401,7 @@ class NavigationMesh {
 			allEdges.forEach( edge => {
 				if( edge.from === currentPoint || edge.from === nextPoint ) return;
 				if( edge.to === currentPoint || edge.to === nextPoint ) return;
-				console.log("Testing edge", edge.toString());
+				// console.log("Testing edge", edge.toString());
 				if( NavigationUtils.lineIntersection( lineStart, lineEnd, edge.from.point, edge.to.point ) ){
 					if( edge.boundary ){
 						totalOutsideIntersection++;
@@ -410,12 +410,12 @@ class NavigationMesh {
 					}
 				}
 			});
-			console.groupEnd();
-			console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
+			// console.groupEnd();
+			// console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
 			if( totalInsideIntersection > 0 && totalOutsideIntersection === 0 ) {
-				console.log("Direct line so updated path");
+				// console.log("Direct line so updated path");
 				lastPoint = nextPoint;
-				console.groupEnd();
+				// console.groupEnd();
 				continue;
 			}
 
@@ -424,7 +424,7 @@ class NavigationMesh {
 			 * Get triangles that both the last point and next point share and check
 			 * to see if the spare points are closed than the last
 			 */
-			console.log("Closer spare nodes test");
+			// console.log("Closer spare nodes test");
 			let spareTriangles = new Set();
 			let sparePoints = [];
 			let currentDistance = NavigationUtils.distance( currentPoint.point || currentPoint, lastPoint.point );
@@ -443,7 +443,7 @@ class NavigationMesh {
 				spareDistance = NavigationUtils.distance( currentPoint.point || currentPoint, point );
 				spareDistance += NavigationUtils.distance( point, nextPoint.point || nextPoint );
 				if( spareDistance < currentDistance ){
-					console.groupCollapsed("Shorter distance so intersection check");
+					// console.groupCollapsed("Shorter distance so intersection check");
 					totalInsideIntersection = 0;
 					totalOutsideIntersection = 0;
 					lineStart = currentPoint.point || currentPoint;
@@ -451,7 +451,7 @@ class NavigationMesh {
 					allEdges.forEach( edge => {
 						if( edge.from.point === lineStart || edge.from.point === lineEnd ) return;
 						if( edge.to.point === lineStart || edge.to.point === lineEnd ) return;
-						console.log("Testing edge", edge.toString());
+						// console.log("Testing edge", edge.toString());
 						if( NavigationUtils.lineIntersection( lineStart, lineEnd, edge.from.point, edge.to.point ) ){
 							if( edge.boundary ){
 								totalOutsideIntersection++;
@@ -460,8 +460,8 @@ class NavigationMesh {
 							}
 						}
 					});
-					console.groupEnd();
-					console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
+					// console.groupEnd();
+					// console.log( "Intersection summary:", "In", totalInsideIntersection, "Out", totalOutsideIntersection );
 					if( totalInsideIntersection > 0 && totalOutsideIntersection === 0 ) {
 						currentDistance = spareDistance;
 						lastPoint = this.nodes.get( point.toString() );
@@ -476,7 +476,7 @@ class NavigationMesh {
 			currentPoint = lastPoint;
 			lastPoint = nextPoint;
 
-			console.groupEnd();
+			// console.groupEnd();
 
 		}
 
