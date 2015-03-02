@@ -1,8 +1,8 @@
 class NavigationNode {
 
-	constructor(){
+	constructor( point ){
 		this.edges = new Set();
-		this.point = null;
+		this.point = point || null;
 		this.triangles = new Set();
 	}
 
