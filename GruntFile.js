@@ -1,7 +1,7 @@
 module.exports = function( grunt ) {
 
 	grunt.initConfig({
-		"6to5": {
+		"babel": {
 			"dist": {
 				"files": {
 					"dist/NavigationMesh.js": "dist/NavigationMesh-es6.js"
@@ -14,7 +14,7 @@ module.exports = function( grunt ) {
 		"concat": {
 			"dist": {
 				"dest": "dist/NavigationMesh-es6.js",
-				"src": [ "node_modules/grunt-6to5/node_modules/6to5/browser-polyfill.js", "src/**/*.js" ]
+				"src": [ "node_modules/grunt-babel/node_modules/babel-core/browser-polyfill.js", "src/**/*.js" ]
 			}
 		},
 		"pkg": grunt.file.readJSON("package.json"),
@@ -32,9 +32,9 @@ module.exports = function( grunt ) {
 
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-watch");
-	grunt.loadNpmTasks("grunt-6to5");
+	grunt.loadNpmTasks("grunt-babel");
 
 	// Default task(s).
-	grunt.registerTask("default", [ "concat:dist", "6to5:dist" ]);
+	grunt.registerTask("default", [ "concat:dist", "babel:dist" ]);
 
 };
