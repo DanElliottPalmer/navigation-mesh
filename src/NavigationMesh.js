@@ -316,7 +316,8 @@ class NavigationMesh {
 
 	path( start, end ){
 		let path = this.findGraphPath( start, end );
-		path = this.simplify( path );
+		path = this.simplify( path.reverse() );
+		path = this.simplify( path.reverse() );
 		path = path.map( point => {
 			if( point instanceof NavigationPoint ) return [ point.x, point.y ];
 			return [ point.point.x, point.point.y ];
