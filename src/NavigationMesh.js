@@ -367,7 +367,28 @@ class NavigationMesh {
 			}
 
 			/**
-			 * Secondly, can we just draw a straight line and solve all problems?
+			 * What if points share the same triangle and current and next are both
+			 * start and end points
+			 */
+			if( currentPoint === simplePath[0] && i === pathCopy.length - 1 ){
+				console.log("Testing if points share the same triangle");
+				let pointsInSameTriangle = false;
+				lastPoint.triangles.forEach( triangle => {
+					if( pointsInSameTriangle ) return;
+					pointsInSameTriangle = triangle.containsPoint( currentPoint.x, currentPoint.y ) &&
+																 triangle.containsPoint( nextPoint.x, nextPoint.y );
+				});
+				if( pointsInSameTriangle ){
+					console.log("Points share the same triangle");
+					lastPoint = nextPoint;
+					console.groupEnd();
+					continue;
+				}
+			}
+
+
+			/**
+			 * Can we just draw a straight line and solve all problems?
 			 */
 			console.groupCollapsed( "Intersection test" );
 			// Test all the edges left but skip ones that are connected to the
