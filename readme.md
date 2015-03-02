@@ -267,3 +267,7 @@ Calculates if line1 (point1, point2) intersects with line2 (point3, point4)
 | point2    | Yes      | NavigationPoint | End point of line1 |
 | point3    | Yes      | NavigationPoint | Starting point of line2 |
 | point4    | Yes      | NavigationPoint | End point of line2 |
+
+##Things still left todo
+
+* Make the editor better
