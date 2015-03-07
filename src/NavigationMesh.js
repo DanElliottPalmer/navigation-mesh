@@ -7,6 +7,16 @@ class NavigationMesh {
 		this.triangles = null;
 	}
 
+	containsPoint( x, y ){
+		let length = this.triangles.length;
+		while( length-- ){
+			if( this.triangles[ length ].containsPoint( x, y ) ){
+				return this.triangles[ length ];
+			}
+		}
+		return false;
+	}
+
 	findGraphPath( start, end ){
 
 		// Start node that we will add into the graph network
