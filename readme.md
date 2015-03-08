@@ -59,6 +59,16 @@ Returns a string in the format of `((from.x, from.y),(to.x, to.y))`
 
 ##NavigationMesh
 ```
+containsPoint( x, y ) → {Boolean, NavigationTriangle}
+```
+Returns the triangle the point is in. If it fails, it will return false.
+
+| Name | Required | Type            | Description                       |
+|------|----------|-----------------|-----------------------------------|
+| x    | Yes      | Number | The x position |
+| y    | Yes      | Number | The y position |
+
+```
 edges → {Map}
 ```
 A map containing all the edges with the edge.toString() as the key value
