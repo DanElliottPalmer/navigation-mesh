@@ -182,6 +182,34 @@ class NavigationMesh {
 
 	}
 
+	getClosestEdge( x, y ){
+
+		/**
+		 * Check if point is inside the mesh. If so we only have to check 3 edges
+		 * of the triangle we are in
+		 * If not, check the boundaries to see which one it is closer to.
+		 */
+		let edges = this.edges;
+		let triangle;
+
+		if( ( triangle = this.containsPoint( x, y ) ) ){
+			edges = this.getEdgesFromTriangle( triangle );
+		}
+
+		let currentDistance = 0;
+		let closestDistance = Number.MAX_VALUE;
+		let closestEdge;
+		const point = new NavigationPoint( x, y );
+		edges.forEach( edge => {
+			currentDistance = NavigationUtils.distanceToEdge( point, edge );
+			if( currentDistance < closestDistance ){
+				closestDistance = currentDistance;
+				closestEdge = edge;
+			}
+		});
+		return closestEdge;
+	}
+
 	getEdgeContaining( node1, node2 ){
 		if( this.edges === null ) return false;
 		let key = "";
@@ -192,6 +220,18 @@ class NavigationMesh {
 			return this.edges.get( key );
 		}
 		return false;
+	}
+
+	getEdgesFromTriangle( triangle ){
+		const nodes = triangle.points.map( point => {
+			return this.nodes.get( point.toString() );
+		});
+		let edges = new Array( 3 );
+		nodes.reduce( ( previous, current, index ) => {
+			edges[index] = this.getEdgeContaining( previous, current );
+			return current;
+		}, nodes[ 2 ]);
+		return edges;
 	}
 
 	getNeighbours( node ){

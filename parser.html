@@ -67,6 +67,8 @@
 			var startPoint = new NavigationPoint( 508, 260 );
 			var endPoint = new NavigationPoint( 489,335 );
 
+			var testEdge = null;
+
 			document.getElementById("chkRenderGraph").addEventListener("change", function onRenderGraphChange(){
 				isRenderGraph = this.checked;
 			});
@@ -121,14 +123,14 @@
 			});
 
 			document.getElementById("domCanvas").addEventListener("click", function( e ){
+				var ev = processEvent( e );
+				testEdge = mesh.getClosestEdge( ev.x, ev.y );
 				if( !isStartPoint && !isEndPoint ) return;
 
-				var ev = processEvent( e );
-
 				if( isStartPoint ){
-					startPoint = new NavigationPoint( e.x, e.y );
+					startPoint = new NavigationPoint( ev.x, ev.y );
 				} else if( isEndPoint ){
-					endPoint = new NavigationPoint( e.x, e.y );
+					endPoint = new NavigationPoint( ev.x, ev.y );
 				}
 
 				isStartPoint = false;
@@ -253,6 +255,9 @@
 						ctx.strokeStyle = "#00f";
 					} else {
 						ctx.strokeStyle = "#0f0";
+					}
+					if( testEdge !== null && edge === testEdge ){
+						ctx.strokeStyle = "#f0f";
 					}
 					ctx.beginPath();
 					ctx.moveTo( edge.from.point.x, edge.from.point.y );
