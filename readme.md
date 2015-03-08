@@ -285,6 +285,16 @@ Measures the distance from point a to point b
 |------|----------|-----------------|-----------------------------------|
 | a    | Yes      | NavigationPoint | The point to start measuring from |
 | b    | Yes      | NavigationPoint | The point to measure to           |
+
+```
+distanceToEdge( point, edge ) → {Number}
+```
+Measures the distance from the point to the edge
+
+| Name | Required | Type            | Description                       |
+|------|----------|-----------------|-----------------------------------|
+| point    | Yes      | NavigationPoint | The point |
+| edge    | Yes      | NavigationEdge | The edge           |
   
 ```
 heuristic( a, b ) → {Number}
@@ -307,6 +317,57 @@ Calculates if line1 (point1, point2) intersects with line2 (point3, point4)
 | point2    | Yes      | NavigationPoint | End point of line1 |
 | point3    | Yes      | NavigationPoint | Starting point of line2 |
 | point4    | Yes      | NavigationPoint | End point of line2 |
+
+###Vector
+```
+add( a, b ) → {NavigationPoint}
+```
+Adds the two points together
+
+| Name | Required | Type            |
+|------|----------|-----------------|
+| a    | Yes      | NavigationPoint |
+| b    | Yes      | NavigationPoint |
+
+```
+div( a, b ) → {NavigationPoint}
+```
+Divides the two points together
+
+| Name | Required | Type            |
+|------|----------|-----------------|
+| a    | Yes      | NavigationPoint |
+| b    | Yes      | NavigationPoint |
+
+```
+dot( a, b ) → {Number}
+```
+Calculates the dot product of the two points
+
+| Name | Required | Type            |
+|------|----------|-----------------|
+| a    | Yes      | NavigationPoint |
+| b    | Yes      | NavigationPoint |
+
+```
+mul( a, b ) → {NavigationPoint}
+```
+Multiplies the two points together
+
+| Name | Required | Type            |
+|------|----------|-----------------|
+| a    | Yes      | NavigationPoint |
+| b    | Yes      | NavigationPoint |
+
+```
+sub( a, b ) → {NavigationPoint}
+```
+Subtracts the two points together
+
+| Name | Required | Type            |
+|------|----------|-----------------|
+| a    | Yes      | NavigationPoint |
+| b    | Yes      | NavigationPoint |
 
 ##Things still left todo
 
