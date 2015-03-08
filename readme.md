@@ -84,6 +84,27 @@ Walks the nodes and edges to work out what is the shortest **only** using edges.
 | end    | Yes      | NavigationPoint | The point to end pathfinding |
 
 ```
+getClosestEdge( x, y ) → {NavigationEdge}
+```
+Returns an edge that is closest to the specified coordinates
+
+| Name | Required | Type            | Description                       |
+|------|----------|-----------------|-----------------------------------|
+| x    | Yes      | Number | The x position |
+| y    | Yes      | Number | The y position |
+
+```
+getClosestPointOnEdge( x, y, edge ) → {NavigationPoint}
+```
+Returns a point on the specified edge. It is clamped to the start and end of the line
+
+| Name | Required | Type            | Description                       |
+|------|----------|-----------------|-----------------------------------|
+| x    | Yes      | Number | The x position |
+| y    | Yes      | Number | The y position |
+| edge    | Yes      | NavigationEdge | The edge to get a point on |
+
+```
 getEdgeContaining( nodeA, nodeB ) → {Boolean,NavigationEdge}
 ```
 Returns an edge that contains nodeA and nodeB. If it fails, it will return false.
@@ -92,6 +113,15 @@ Returns an edge that contains nodeA and nodeB. If it fails, it will return false
 |------|----------|-----------------|-----------------------------------|
 | nodeA    | Yes      | NavigationNode | One of the nodes in the edge |
 | nodeB    | Yes      | NavigationNode | One of the nodes in the edge |
+
+```
+getEdgesFromTriangle( triangle ) → {Array.<NavigationEdge>}
+```
+Returns all the edges associated with the triangle.
+
+| Name | Required | Type            | Description                       |
+|------|----------|-----------------|-----------------------------------|
+| triangle    | Yes      | NavigationTriangle | A triangle |
 
 ```
 getNeighbours( node ) → {Boolean, Array.<NavigationPoint>}
