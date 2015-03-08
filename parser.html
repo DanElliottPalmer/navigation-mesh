@@ -68,6 +68,7 @@
 			var endPoint = new NavigationPoint( 489,335 );
 
 			var testEdge = null;
+			var testEdgePoint = null;
 
 			document.getElementById("chkRenderGraph").addEventListener("change", function onRenderGraphChange(){
 				isRenderGraph = this.checked;
@@ -125,6 +126,7 @@
 			document.getElementById("domCanvas").addEventListener("click", function( e ){
 				var ev = processEvent( e );
 				testEdge = mesh.getClosestEdge( ev.x, ev.y );
+				testEdgePoint = mesh.getClosestPointOnEdge( ev.x, ev.y, testEdge );
 				if( !isStartPoint && !isEndPoint ) return;
 
 				if( isStartPoint ){
@@ -265,6 +267,13 @@
 					ctx.closePath();
 					ctx.stroke();
 				});
+				if( testEdgePoint !== null ){
+					ctx.fillStyle = "#f0f";
+					ctx.beginPath();
+					ctx.arc( testEdgePoint.x, testEdgePoint.y, 10, 0, Math.PI*2, false );
+					ctx.closePath();
+					ctx.fill();
+				}
 				ctx.restore();
 			}
 

@@ -210,6 +210,32 @@ class NavigationMesh {
 		return closestEdge;
 	}
 
+	getClosestPointOnEdge( x, y, edge ){
+		let point = new NavigationPoint( x, y );
+		let fromToPoint = NavigationUtils.Vector.sub( point, edge.from.point );
+		let fromToTo = NavigationUtils.Vector.sub( edge.to.point, edge.from.point );
+
+		let magnitude = NavigationUtils.square( fromToTo.x ) + NavigationUtils.square( fromToTo.y );
+
+		/**
+		 * Clamp the dot to a min of 0 and a max of the edge
+		 */
+		let dot = NavigationUtils.Vector.dot( fromToPoint, fromToTo );
+		const dot2 = NavigationUtils.Vector.dot( fromToTo, fromToTo );
+		if( dot < 0 ) {
+			dot = 0;
+		} else if( dot > dot2 ){
+			dot = dot2;
+		}
+
+		let t = dot / magnitude;
+
+		return new NavigationPoint(
+			edge.from.point.x + fromToTo.x * t,
+			edge.from.point.y + fromToTo.y * t
+		);
+	}
+
 	getEdgeContaining( node1, node2 ){
 		if( this.edges === null ) return false;
 		let key = "";
