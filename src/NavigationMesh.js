@@ -185,10 +185,10 @@ class NavigationMesh {
 	getEdgeContaining( node1, node2 ){
 		if( this.edges === null ) return false;
 		let key = "";
-		if( this.edges.has( ( key = node1 + "," + node2 ) ) ){
+		if( this.edges.has( ( key = "(" + node1.toString() + "," + node2.toString() + ")" ) ) ){
 			return this.edges.get( key );
 		}
-		if( this.edges.has( ( key = node2 + "," + node1 ) ) ){
+		if( this.edges.has( ( key = "(" + node2.toString() + "," + node1.toString() + ")" ) ) ){
 			return this.edges.get( key );
 		}
 		return false;
