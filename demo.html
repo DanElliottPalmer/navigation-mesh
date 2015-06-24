@@ -14,6 +14,7 @@
 	<body>
 
 		<canvas></canvas>
+		<button id="btnCreateMesh">Create mesh</button>
 
 		<script type="text/javascript" src="dist/NavigationMesh.js"></script>
 		<script type="text/javascript">
@@ -21,16 +22,20 @@
 			var WIDTH = 500;
 			var HEIGHT = 500;
 			var STATE_POINTS = 0;
+			var STATE_MESH = 1;
 
 			var canvas = document.getElementsByTagName("canvas")[0];
 			var ctx = canvas.getContext("2d");
 
 			var points = [];
+			var mesh = null;
 			var canvasState = STATE_POINTS;
 
 			canvas.width = WIDTH;
 			canvas.height = HEIGHT;
 			canvas.addEventListener( "click", onCanvasClick, false );
+
+			document.getElementById("btnCreateMesh").addEventListener( "click", onCreateClick );
 
 			render();
 
@@ -45,10 +50,20 @@
 				}
 
 			}
+			function onCreateClick(){
+				mesh = new NavigationMesh( points );
+				points.length = 0;
+				canvasState = STATE_MESH;
+			}
 			function render(){
 				requestAnimationFrame( render );
 				clear();
 
+				ctx.save();
+
+				/**
+				 * Render the points
+				 */
 				if( canvasState === STATE_POINTS ){
 					ctx.fillStyle = "#f00";
 					ctx.globalAlpha = 0.5;
@@ -58,7 +73,34 @@
 						ctx.closePath();
 						ctx.fill();
 					});
+					return;
 				}
+
+				/**
+				 * Render the points and lines
+				 */
+				if( canvasState === STATE_MESH ){
+					ctx.fillStyle = "#0f0";
+					ctx.strokeStyle = "#0f0";
+					mesh.shape.points.reduce(function( previous, current ){
+						// Point
+						ctx.globalAlpha = 0.5;
+						ctx.beginPath();
+						ctx.arc( current.x, current.y,5, 0, Math.PI*2, false );
+						ctx.closePath();
+						ctx.fill();
+						// Line
+						ctx.globalAlpha = 1;
+						ctx.beginPath();
+						ctx.moveTo( previous.x, previous.y );
+						ctx.lineTo( current.x, current.y );
+						ctx.closePath();
+						ctx.stroke();
+						return current;
+					}, mesh.shape.points[ mesh.shape.points.length - 1 ]);
+				}
+
+				ctx.restore();
 
 			}
 
