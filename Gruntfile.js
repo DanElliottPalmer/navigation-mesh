@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 		"browserify": {
 			"dev": {
 				"files": {
-					"dist/navigation-mesh.js": [ "tmp/navigation-mesh.js" ]
+					"dist/NavigationMesh.js": [ "tmp/NavigationMesh.js" ]
 				},
 				"options": {
 					"browserifyOptions": {
