@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>    <html class="lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class=""> <!--<![endif]-->
+	<head>  
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="description" content="" />  
+		<meta name="keywords" content="" />
+		<meta name="robots" content="" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	</head>
+	<body>
+
+		<canvas></canvas>
+
+		<script type="text/javascript" src="dist/NavigationMesh.js"></script>
+		<script type="text/javascript">
+
+			var WIDTH = 500;
+			var HEIGHT = 500;
+			var STATE_POINTS = 0;
+
+			var canvas = document.getElementsByTagName("canvas")[0];
+			var ctx = canvas.getContext("2d");
+
+			var points = [];
+			var canvasState = STATE_POINTS;
+
+			canvas.width = WIDTH;
+			canvas.height = HEIGHT;
+			canvas.addEventListener( "click", onCanvasClick, false );
+
+			render();
+
+			function clear(){
+				ctx.clearRect( 0, 0, WIDTH, HEIGHT );
+			}
+			function onCanvasClick( e ){
+				console.log( e );
+
+				if( canvasState === STATE_POINTS ){
+					points.push( new NavigationMesh.Point( e.offsetX, e.offsetY ) );
+				}
+
+			}
+			function render(){
+				requestAnimationFrame( render );
+				clear();
+
+				if( canvasState === STATE_POINTS ){
+					ctx.fillStyle = "#f00";
+					ctx.globalAlpha = 0.5;
+					points.forEach(function( pt ){
+						ctx.beginPath();
+						ctx.arc( pt.x, pt.y,5, 0, Math.PI*2, false );
+						ctx.closePath();
+						ctx.fill();
+					});
+				}
+
+			}
+
+		</script>
+
+	</body>
+</html>
