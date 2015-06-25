@@ -25,10 +25,21 @@ class Polygon {
 		this.bounds.height = maxPos.y - minPos.y;
 	}
 
+	_getVertices(){
+		this.vertices.length = 0;
+		this.points.reduce( ( previous, current ) => {
+			this.vertices.push( [ previous, current ] );
+			return current;
+		}, this.points[ this.points.length - 1 ]);
+	}
+
 	constructor( points = [] ){
 		this.bounds = new Rect();
 		this.points = points.slice(0);
+		this.vertices = [];
+
 		this._getBoundary();
+		this._getVertices();
 	}
 
 	// http://alienryderflex.com/polygon/
