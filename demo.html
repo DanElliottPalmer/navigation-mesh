@@ -30,12 +30,19 @@
 			var points = [];
 			var mesh = null;
 			var canvasState = STATE_POINTS;
+			var debugMessage = [];
+
+			// Mouse coords
+			debugMessage.push(new NavigationMesh.Point());
+			// Polygon hit test
+			debugMessage.push("");
 
 			canvas.width = WIDTH;
 			canvas.height = HEIGHT;
 			canvas.addEventListener( "click", onCanvasClick, false );
+			canvas.addEventListener( "mousemove", onCanvasMousemove, false );
 
-			document.getElementById("btnCreateMesh").addEventListener( "click", onCreateClick );
+			document.getElementById("btnCreateMesh").addEventListener( "click", onCreateClick, false );
 
 			render();
 
@@ -49,6 +56,15 @@
 					points.push( new NavigationMesh.Point( e.offsetX, e.offsetY ) );
 				}
 
+			}
+			function onCanvasMousemove(e){
+				debugMessage[0].x = e.offsetX;
+				debugMessage[0].y = e.offsetY;
+
+				if( canvasState === STATE_MESH ){
+					debugMessage[1] = mesh.shape.contains( debugMessage[0] );
+				}
+			
 			}
 			function onCreateClick(){
 				mesh = new NavigationMesh( points );
@@ -73,7 +89,6 @@
 						ctx.closePath();
 						ctx.fill();
 					});
-					return;
 				}
 
 				/**
@@ -100,8 +115,27 @@
 					}, mesh.shape.points[ mesh.shape.points.length - 1 ]);
 				}
 
+				renderDebug();
+
 				ctx.restore();
 
+			}
+			function renderDebug(){
+				var output = [];
+				debugMessage.forEach(function( value, index ){
+					switch( index ){
+						case 1:
+							if( value === "" ) break;
+
+						default:
+							output.push( value );
+							break;
+					}
+				});
+				ctx.font = "10px Arial";
+				ctx.fillStyle = "#000";
+				ctx.globalAlpha = 1;
+				ctx.fillText( output.join(" - "), 5, 15 );
 			}
 
 		</script>
