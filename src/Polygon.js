@@ -31,13 +31,42 @@ class Polygon {
 		this._getBoundary();
 	}
 
+	// http://alienryderflex.com/polygon/
 	contains( point = null ){
 		if( !point ) return false;
 
 		// Quick test
 		if( !this.bounds.contains( point ) ) return false;
 
-		return false;
+		let i = -1;
+		let j = this.points.length - 1;
+		let length = this.points.length;
+		let oddIntersections = false;
+
+		while( ++i < length ){
+
+			if(
+				( this.points[i].y < point.y && this.points[j].y >= point.y ||
+					this.points[j].y < point.y && this.points[i].y >= point.y ) &&
+				( this.points[i].x <= point.x || this.points[j].x <= point.x )
+			){
+
+				if(
+					this.points[i].x +
+					( point.y - this.points[i].y ) /
+					( this.points[j].y - this.points[i].y ) *
+					( this.points[j].x - this.points[i].x ) < point.x
+				){
+					oddIntersections = !oddIntersections;
+				}
+
+			}
+
+			j = i;
+
+		}
+
+		return oddIntersections;
 	}
 
 	toString(){
