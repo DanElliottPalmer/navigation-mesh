@@ -80,6 +80,19 @@ class Polygon {
 		return oddIntersections;
 	}
 
+	hasVertex( from, to ){
+		let length = this.vertices.length;
+		let vertex = null;
+		while( length-- ){
+			vertex = this.vertices[ length ];
+			if( vertex[0].equals( from ) &&
+					vertex[1].equals( to ) ) return true;
+			if( vertex[1].equals( from ) &&
+					vertex[0].equals( to ) ) return true;
+		}
+		return false;
+	}
+
 	toString(){
 		return `(${ this.points.map( pt => pt.toString() ) })`;
 	}
