@@ -6,6 +6,9 @@ export default class Point {
 		this.x = x | 1;
 		this.y = y | 1;
 	}
+	equals( point ){
+		return this.x === point.x && this.y === point.y;
+	}
 	toArray(){
 		return [ this.x, this.y ];
 	}
