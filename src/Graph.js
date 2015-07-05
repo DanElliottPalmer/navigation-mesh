@@ -23,7 +23,9 @@ class Graph {
 			if( !extraNode ) return link[1].hasNode( node );
 			return link[1].hasNode( node ) && link[1].hasNode( extraNode );
 		};
-		return Array.from( this.links ).filter( filter );
+		return Array.from( this.links )
+						.filter( filter )
+						.map( link => link[1] );
 	}
 
 	hasLink( link ){
