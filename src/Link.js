@@ -6,6 +6,11 @@ class Link {
 		this.nodes = [ node1, node2 ];
 	}
 
+	getOtherNode( node ){
+		if( this.nodes[0] === node ) return this.nodes[1];
+		return this.nodes[0];
+	}
+
 	hasNode( node ){
 		return this.nodes[0] === node || this.nodes[1] === node;
 	}
