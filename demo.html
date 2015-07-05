@@ -15,6 +15,9 @@
 
 		<canvas></canvas>
 		<button id="btnCreateMesh">Create mesh</button>
+		<button id="btnAddStart">Add start</button>
+		<button id="btnAddEnd">Add end</button>
+		<button id="btnPathfind">Pathfind</button>
 
 		<script type="text/javascript" src="dist/NavigationMesh.js"></script>
 		<script type="text/javascript">
@@ -23,6 +26,9 @@
 			var HEIGHT = 500;
 			var STATE_POINTS = 0;
 			var STATE_MESH = 1;
+			var STATE_START = 2;
+			var STATE_END = 3;
+			var STATE_PATH = 4;
 
 			var canvas = document.getElementsByTagName("canvas")[0];
 			var ctx = canvas.getContext("2d");
@@ -31,6 +37,9 @@
 			var mesh = null;
 			var canvasState = STATE_POINTS;
 			var debugMessage = [];
+			var startPoint = null;
+			var endPoint = null;
+			var path = null;
 
 			// Mouse coords
 			debugMessage.push(new NavigationMesh.Point());
@@ -43,6 +52,9 @@
 			canvas.addEventListener( "mousemove", onCanvasMousemove, false );
 
 			document.getElementById("btnCreateMesh").addEventListener( "click", onCreateClick, false );
+			document.getElementById("btnAddStart").addEventListener( "click", onStartClick, false );
+			document.getElementById("btnAddEnd").addEventListener( "click", onEndClick, false );
+			document.getElementById("btnPathfind").addEventListener( "click", onPathfindClick, false );
 
 			render();
 
@@ -54,6 +66,29 @@
 
 				if( canvasState === STATE_POINTS ){
 					points.push( new NavigationMesh.Point( e.offsetX, e.offsetY ) );
+					return;
+				}
+
+				if( canvasState === STATE_START ){
+					if( startPoint === null ){
+						startPoint = new NavigationMesh.Point( e.offsetX, e.offsetY );
+					} else {
+						startPoint.x = e.offsetX;
+						startPoint.y = e.offsetY;
+					}
+					canvasState = STATE_MESH;
+					return;
+				}
+
+				if( canvasState === STATE_END ){
+					if( endPoint === null ){
+						endPoint = new NavigationMesh.Point( e.offsetX, e.offsetY );
+					} else {
+						endPoint.x = e.offsetX;
+						endPoint.y = e.offsetY;
+					}
+					canvasState = STATE_MESH;
+					return;
 				}
 
 			}
@@ -70,6 +105,16 @@
 				mesh = new NavigationMesh( points );
 				points.length = 0;
 				canvasState = STATE_MESH;
+			}
+			function onStartClick( e ){
+				canvasState = STATE_START;
+			}
+			function onEndClick( e ){
+				canvasState = STATE_END;
+			}
+			function onPathfindClick(){
+				canvasState = STATE_PATH;
+				path = mesh.route( startPoint, endPoint );
 			}
 			function render(){
 				requestAnimationFrame( render );
@@ -94,7 +139,16 @@
 				/**
 				 * Render the points and lines
 				 */
-				if( canvasState === STATE_MESH ){
+				if( canvasState === STATE_MESH || 
+						canvasState === STATE_START || 
+						canvasState === STATE_END ||
+						canvasState === STATE_PATH ){
+
+					var alphaOffset = 0;
+					if( canvasState === STATE_PATH ){
+						alphaOffset = -0.3;
+					}
+
 					ctx.fillStyle = "#0f0";
 					ctx.strokeStyle = "#0f0";
 					mesh.shape.points.reduce(function( previous, current ){
@@ -116,20 +170,51 @@
 					ctx.fillStyle = "#00f";
 					ctx.strokeStyle = "#00f";
 					mesh.graph.nodes.forEach(function( node ){
-						ctx.globalAlpha = 0.5;
+						ctx.globalAlpha = 0.5 + alphaOffset;
 						ctx.beginPath();
 						ctx.arc( node.position.x, node.position.y,5, 0, Math.PI*2, false );
 						ctx.closePath();
 						ctx.fill();
 					});
 					mesh.graph.links.forEach(function(link){
-						ctx.globalAlpha = 1;
+						ctx.globalAlpha = 1 + alphaOffset;
 						ctx.beginPath();
 						ctx.moveTo( link.nodes[0].position.x, link.nodes[0].position.y );
 						ctx.lineTo( link.nodes[1].position.x, link.nodes[1].position.y );
 						ctx.closePath();
 						ctx.stroke();
 					});
+
+					if( startPoint !== null ){
+						ctx.fillStyle = "#FF51F6";
+						ctx.globalAlpha = 1;
+						ctx.beginPath();
+						ctx.arc( startPoint.x, startPoint.y,5, 0, Math.PI*2, false );
+						ctx.closePath();
+						ctx.fill();
+					}
+					if( endPoint !== null ){
+						ctx.fillStyle = "#A30098";
+						ctx.globalAlpha = 1;
+						ctx.beginPath();
+						ctx.arc( endPoint.x, endPoint.y,5, 0, Math.PI*2, false );
+						ctx.closePath();
+						ctx.fill();
+					}
+
+					if( canvasState === STATE_PATH ){
+						ctx.strokeStyle = "#f00";
+						ctx.beginPath();
+						path.forEach(function(point, index){
+							if( index === 0){
+								ctx.moveTo( point.x, point.y );
+								return;
+							}
+							ctx.lineTo( point.x, point.y );
+						});
+						ctx.stroke();
+					}
+
 				}
 
 				renderDebug();
