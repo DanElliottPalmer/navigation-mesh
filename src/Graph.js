@@ -40,7 +40,14 @@ class Graph {
 		this.links.delete( link.toString() );
 	}
 
-	removeNode(){
+	removeNode( node, withLinks = true ){
+
+		if( withLinks ){
+			let links = this.getLinksContainingNode( node );
+			links.forEach( link => this.removeLink( link ) );
+			links.length = 0;
+		}
+
 		this.nodes.delete( node.toString() );
 	}
 
