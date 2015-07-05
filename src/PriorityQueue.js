@@ -70,3 +70,7 @@ class PriorityQueueItem {
 	}
 
 }
+
+PriorityQueue.PriorityQueueItem = PriorityQueueItem;
+
+export default PriorityQueue;
